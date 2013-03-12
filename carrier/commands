@@ -1,0 +1,21 @@
+
+mencoder rites_of_passage1.flv -o rites_of_passage1sub.flv \
+         -oac lavc -ovc lavc -lavcopts autoaspect \
+         -sub  ~/Videos/materials/carrier/csub/srt7.srt \
+         -utf8 -font 'WenQuanYi Micro Hei'
+
+# convert to avi, ffmpeg is better, -sameq needed
+ffmpeg -i input.flv -sameq output.avi
+
+# extract sound, libmp3lame works for me:
+ffmpeg -i input.avi -vn -acodec libmp3lame output.mp3
+
+# split audio file (tested mp3):
+ffmpeg -i input.mp3 -vn -acodec copy -ss 00:00:00 -t 00:05:00 output.mp3
+
+# split video
+ffmpeg -i input.avi -an -vcodec copy -ss 00:00:00 -t 00:05:00 output.avi
+
+# merge audio video
+ffmpeg -i input.avi -i input.mp3 -acodec copy -vcodec copy -sameq output.avi
+

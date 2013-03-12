@@ -1,0 +1,283 @@
+Calomel.org :: Open Source Research and Reference
+
+                                          Home       RSS       Search
+
+
+
+Youtube Downloader Perl Script
+
+download videos and even convert them to mp3 or ogg
+
+
+
+Why use wget to download YouTube videos ?
+
+    Normally, when you want to watch a Youtube video you have to use Adobe Flash in a browser like Firefox,
+    Chrome (Chromium), Opera or Safari. We do not like this limitation as Flash is incredibly inefficient, a
+    huge security hole and notoriously buggy. We like to watch videos in VLC which uses less CPU time and can
+    play videos at higher than 1x speeds. In fact, we watch almost all of our vids at 2x.
+
+    We also prefer a simpler scripted solution that does not rely on too many dependencies or proprietary code.
+    For example, youtube-dl requires Python libraries and others require Javascript, Greesemonkey or even PHP
+    to work in Firefox. Simple is better to audit and modify when needed.
+
+
+
+    Latest Version: 0.30
+
+      □ Youtube made changes in December of 2012 which randomized the URL on the HTML page. This required a
+        rework of the perl search and replace code.
+      □ The script is compatible with native IPv6 clients connecting to either IPv4 or IPv6 youtube servers.
+        This is true for native IPv6 to IPv6 networks or even if you are using a IPv6 tunnel.
+
+
+
+Advantages of a scripted solution
+
+    AdBlock Plus and NoScript safe, No flash needed: To download the Youtube video just cut and paste the URL
+    from the browser's URL bar. You do not need to start the video or anything. In fact, if you have NoScript
+    you do not even have to allow java script on the Youtube site. You just need the link and paste it after
+    the script. Simple and easy.
+
+    Unlimited download speed: There are no download rate limits with the URL we extract from the HTML page. The
+    videos will download as fast as the Youtube cache server will send the data. The speed primarily depends on
+    the popularity of the video; the most asked for videos are put on the highest bandwidth cache servers.
+    Using a testing server on Linode (Xen VPS Hosting) we easily saw 24 megabytes per second downloads. The
+    maximum upload and download limits on a Linode server is 45 megabytes per second. BTW, Linode gets a 10 out
+    of 10 for overall quality in our opinion.
+
+    No Advertisements: The script will _not_ download any ads or advertisements like what you would see if you
+    used the browser to watch flash videos. The reason is the ads are not part of the video, but a flash
+    overlay Youtube inserts. We do not do anything to remove the ads at all. When you see an ad on Youtube the
+    video is actually paused and the advertisement is overlaid on top of the video window. When the ad finishes
+    the overlay is removed and video is unpaused.
+
+
+
+The Youtube Download Perl script
+
+    The youtube download script is written in Perl and can be run on Linux, Mac OSX, OpenBSD, FreeBSD or any
+    operating system supporting perl. Since we are using perl the UNIX shell you use, like bash, tcsh, csh or
+    sh does not matter. There is only one dependency you need to have installed on your system; the system
+    binary "wget". Wget is incredibly useful not only for this perl script, but for any scripting you may do on
+    the future. BTW, the standard wget package will allow you to download videos using HTTP or HTTPS. To make
+    it easy we included the following lines to install these packages using your OS's package manager.
+
+        ## Ubuntu Linux
+        apt-get install wget
+
+        ## FreeBSD
+        pkg_add -r wget
+            OR
+        pkg install wget
+
+        ## OpenBSD
+        pkg_add -i wget
+
+    To use the script, copy and paste the block of perl code from the following text box to a file. We are
+    going to call the script youtube_get_videos.pl for this example, but you can name it anything you like.
+    Remember to make the file executable too, "chmod 755 youtube_get_videos.pl".
+
+    #!/usr/bin/perl
+
+    use strict;
+    use warnings;
+
+    #
+    ##  Calomel.org  ,:,  Download Youtube videos and music using wget
+    ##    Script Name : youtube_get_video.pl
+    ##    Version     : 0.30
+    ##    Valid from  : December 2012
+    ##    URL Page    : https://calomel.org/youtube_wget.html
+    ##    OS Support  : Linux, Mac OSX, OpenBSD, FreeBSD or any system with perl
+    #                `:`
+    ## Two arguments
+    ##    $1 Youtube URL from the browser
+    ##    $2 prefix to the file name of the video (optional)
+    #
+
+    ## collect the URL from the command line argument
+    my $url = $ARGV[0] or die "\nError: You need to specify a YouTube URL\n\n";
+
+    ## declare the user defined file name prefix
+    my $prefix = defined($ARGV[1]) ? $ARGV[1] : "";
+
+    ## download the html code from the youtube page
+    my $html = `wget -Ncq -e "convert-links=off" --keep-session-cookies --save-cookies /dev/null --no-check-certificate "$url" -O-`  or die  "\nThere was a problem downloading the HTML file.\n\n";
+
+    ## collect the title of the page to use as the file name
+    my ($title) = $html =~ m/<title>(.+)<\/title>/si;
+    $title =~ s/[^\w\d]+/_/g;
+    $title =~ s/_youtube//ig;
+    $title =~ s/^_//ig;
+    $title = lc ($title);
+
+    ## collect the URL of the video
+    my ($download) = $html =~ /"url_encoded_fmt_stream_map"([\s\S]+?)\,/ig;
+
+    ## clean up the url by translating unicode and removing unwanted strings
+    $download =~ s/\:\ \"//;
+    $download =~ s/%3A/:/g;
+    $download =~ s/%2F/\//g;
+    $download =~ s/%3F/\?/g;
+    $download =~ s/%3D/\=/g;
+    $download =~ s/%252C/%2C/g;
+    $download =~ s/%26/\&/g;
+    $download =~ s/sig=/signature=/g;
+    $download =~ s/\\u0026/\&/g;
+    $download =~ s/(type=[^&]+)//g;
+    $download =~ s/(fallback_host=[^&]+)//g;
+    $download =~ s/(quality=[^&]+)//g;
+
+    ## collect the url and signature since the html page randomizes the order
+    my ($signature) = $download =~ /(signature=[^&]+)/;
+    my ($youtubeurl) = $download =~ /(http.+)/;
+    $youtubeurl =~ s/&signature.+$//;
+
+    ## combine the url and signature in order to use in wget
+    $download = "$youtubeurl\&$signature";
+
+    ## a bit more cleanup
+    $download =~ s/&+/&/g;
+    $download =~ s/&itag=\d+&signature=/&signature=/g;
+
+    ## print the file name of the video collected from the web page title for us to see on the cli
+    print "\n Download: $prefix$title.webm\n\n";
+
+    ## Download the file using wget and background the wget process
+    system("wget -Ncq -e \"convert-links=off\" --load-cookies /dev/null --tries=50 --timeout=45 --no-check-certificate \"$download\" -O $prefix$title.webm &");
+
+    #### EOF #####
+
+
+
+Running the youtube_get_videos.pl script
+
+    Once you have the script setup you just need to find a Youtube video. We chose a link from Tobygames
+    showing a funny moment in Fallout 3: New Vegas which is 1 minute and 10 seconds long. Execute the script
+    with the youtube URL copy and pasted from Firefox's URL bar. Make note you can add one more argument to the
+    end of the command line to add a prefix to the file name. Here is an example of both options; notice the
+    change in files names as the second example has "toby_" as the file name prefix. Also note some of the URLS
+    through youtube have ampersands "&" in them. For these types of URL's just use double quotes around the url
+    so your shell passes the full string into the script.
+
+    ## Example 1: Here we just pass the youtube URL
+    #
+    user@machine$ ./youtube_get_videos.pl http://www.youtube.com/watch?v=ejkm5uGoxs4
+
+         Download: radscorpion.webm
+
+
+    ## Example 2: Here we pass the Youtube URL and the file name prefix "toby_"
+    #
+    user@machine$ ./youtube_get_videos.pl http://www.youtube.com/watch?v=ejkm5uGoxs4 toby_
+
+         Download: toby_radscorpion.webm
+
+
+    The video will download in the background and save to your current directory. You can play it with your
+    favorite video player, we prefer VLC for example.
+
+
+
+Notes on how the script works
+
+    File name is the same as the name of the web page: Notice the file name is the same as the title of the
+    Youtube web page. We have also scrubbed the title to take out all special characters and reduce all letters
+    to lower case. This makes it easier read and to run on the command line.
+
+    Only the highest video quality: The script works by reducing the YouTube link's HTML code to just the URL
+    to download the video. We have setup the script to only download the highest quality video available. The
+    qualities will be 1080p, 720p or 480p respectively.
+
+    Save Location: The video will be saved in your current directory.
+
+    Script methodology: The wget line will run in the background. You can start as many of these downloads as
+    you want. We have started as many as a dozen simultaneous downloads without issue. The script will finish
+    silently; meaning when the download is finished you will not get any notification.
+
+    Wget process state: You can check if the download is running by looking at the process list (ps) and
+    grep'ing for wget. Something like, ps -aux | grep wget will work. At this point there is no way to tell how
+    fast the download is going. What you can do is look at the file size change using ls -la and estimate from
+    there. You can start watching the video file right away too. The file is downloaded serially, so as soon as
+    the file starts downloading you should be able to start VLC if want to watch the video right away.
+
+    Video file type: The video format will be WebM which is also called VP8. WebM is a digital multimedia
+    container file format promoted by the open-source WebM Project headed by Google. It comprises a subset of
+    the Matroska multimedia container format. If you current media player does not support webm then you need a
+    codec for your OS. Just search on Google for "webm codec" and you should get pointed in the right
+    direction. Note, you can play this format with the VLC media player which is available on all OS's. VLC is
+    a free and open source cross-platform multimedia player and framework that plays most multimedia files as
+    well as DVD, Audio CD, VCD, and various streaming protocols. VLC can also play the videos at greater than
+    1x speed by hitting the plus "+" key on the keypad. When playing videos at anything faster than 1x the
+    sound will be automatically pitch corrected. For example, we like to watch Day9 and HuskyStarcraft videos
+    at 2x.
+
+    Always use the latest script version: Youtube changes the format of their HTML pages every once in a while
+    which consequently breaks download scripts like what we have here. The average amount of time between HTML
+    format changes is three(3) months. If you find this script no longer works make sure to check back on this
+    page for any updates. We will do our best to keep this command line option working since we use this script
+    at least once a day. Make note, at the top of the script we have the version number and date the script is
+    good from. We will also post on the RSS feed (link at the top of the page) when a new version is available.
+
+
+
+How can I extract sound from a video and make a mp3 or ogg ?
+
+    At some point you will want to save off the sound from a video. A good case is downloading an instructional
+    video and listening to it on your music player like a Sansa Clip, iPad, iPhone or iPod. We like to download
+    class videos from the Massachusetts Institute of Technology (MIT) and listen to them in the car.
+
+    You can use the above download script to get a video and convert the video's soundtrack to MP3 (or OGG or
+    any other) format using avconv. You will need to install avconv in order to extract the audio. For Ubuntu
+    use "apt-get install libav-tools". OpenBSD "pkg_add -i ffmpeg" and FreeBSD use "pkg_add -r ffmpeg" instead
+    if avconv is not available as a package. For Mac OSX you may want to look at ffmpegX.
+
+    ## Convert the audio from a Youtube video to mp3 or ogg, audio only.
+
+    ## download the video. (Same link to Tobygames as above)
+    user@machine$ ./youtube_get_videos.pl https://www.youtube.com/watch?v=ejkm5uGoxs4
+      Downloading:  radscorpion.flv
+
+    ## Convert video to mp3, audio only
+    user@machine$ avconv -i radscorpion.flv -vn -ab 128 toby_audio.mp3
+
+    ## Convert video to ogg, audio only
+    user@machine$ avconv -i radscorpion.flv -vn -ab 128 toby_audio.ogg
+
+
+
+
+Questions?
+
+How about an Android device app ?
+
+
+    Yes, if you have an Android phone or tablet then check out the Android App - YouTube Downloader . You can
+    even choose the format of the video from mp4, to avi to webm! Note: the app is not in the Google store yet,
+    but you can download it directly from the sourceforge link we provided.
+
+Is there a GUI or "clickable" download tool I can use ?
+
+
+    The best Firefox add-on we have found is called Flash Video Downloader - Youtube Downloader by Pavel
+    Shcherbakov . It is incredibly easy to use and offers multiple download formats and a choice of low,
+    medium, high or HD quality. We use this add on all the time when it is easier to use Firefox then our perl
+    script.
+
+I have a patch or the script is broke
+
+    You are welcome to mail us. Please make sure you look at any errors the script outputs to see if you can
+    see the cause of the error. The contact link is at the bottom of this page.
+
+
+
+
+
+Questions, comments, or suggestions? Contact Calomel.org or Google+
+
+
+
+
+
+Calomel.org :: Open Source Research and Reference

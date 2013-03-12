@@ -1,0 +1,25 @@
+# using libfaac on Mac OS X 10.6.8
+# -vn : not copying video
+# -acodec : specify codec used in flv file
+# -ac : channels. 1 is for mono, 2 is for stereo
+# -ab : specify bitrate for output file (note that rate is not kbps but bps)
+# -ar : sampling frequency (Hz)
+# -threads: number of threads for encoding
+# "-strict experimental" is necessary to use libfaac
+ 
+ffmpeg -y -i xxxxxxxxxxx.flv -vn -acodec aac -ac 2 -ab 128000 -ar 44100 -threads 4 -strict experimental xxxxx.m4a
+ 
+# note that codec is 'libmp3lame'
+ffmpeg -i xxxxxxxxxx.m4a -vn -acodec libmp3lame -ac 2 -ab 128 -ar 44100 -threads 4 -f mp3 zzzzzzzzzzz.mp3
+ 
+# or you can directly convert audio track
+ffmpeg -i xxxxxxxxxxx.flv -vn -acodec libmp3lame -ac 2 -ab 128000 -ar 44100 -threads 4 -f mp3 xxxxx.mp3
+ 
+# for wav -acodec option is not necessary
+ffmpeg -i xxxxxxxxxx.flv -vn -threads 4 -ac 1 -ar 44100 xxxxxx.wav
+ 
+# for ogg
+ffmpeg -i xxxxxxxxxx.flv -vn -threads 4 -acodec libvorbis -ac 2 -ar 44100 xxxxxxx.ogg
+ 
+# 単純に音声をコピー
+ffmpeg -i xxxxxxxxxx -vn -threads 4 -acodec copy output.filename

@@ -1,0 +1,165 @@
+
+# Adding subtitle, I can not use path for -font, must be name :
+mencoder rites_of_passage1.flv -o rites_of_passage1sub.flv \
+         -oac lavc -ovc lavc -lavcopts autoaspect \
+         -sub  ~/Videos/materials/carrier/csub/srt7.srt \
+         -utf8 -font 'WenQuanYi Micro Hei'
+
+# use this to get the font name:
+  
+    $ fc-list
+    $ fc-list | grep "WenQuan"
+
+# trying to join a few AVI with index, failed for me 0208:
+
+mencoder -oac copy -ovc copy -idx -o output.avi video1.avi video2.avi video3.avi
+
+# sound volume adjust, 256 is normal, 128 will be half, 512 double:
+ffmpeg -i INPUT.MP3 -acodec libmp3lame -vol 128 OUTPUT.MP3
+
+## processes:
+#
+
+Record desktop with `recordmydesktop` or `ffmpeg`.
+
+`ffmpeg` would be good, the display `:1.0` can be get by 
+    
+    $ echo $DISPLAY
+    $ man ffmpeg  # to find `x11grab`
+
+The frame per second must be set to be same as other video.  Otherwise it causes
+troubles when do post processing. I set it to `23.98`.  The command:
+
+    $ ffmpeg -f x11grab -s 1276x720  -r 23.89  -i :1.0+30,90  OUTPUT.mpg
+
+where -s is the size in pixels.  We can record in relative normal size and then 
+scale it to fit small video screen size.
+
+To scale the recorded file:
+--------------------------
+
+use -vf scale=638x360
+
+    $ mencoder INPUT.mpg -ovc lavc -nosound -vf scale=638:360  -o OUTPUT.mpg
+
+
+Sound
+-----
+
+Get sounds online.  Youtube has many good sound sample.  Download the flv files,
+then extract sound from it.
+
+    $ ffmpeg -i SOUND.flv -sameq  SOUND.mp3
+
+I didn't try the above, this will be ok:
+
+    $ ffmpeg -i SOUND.flv -vn -acodec libmp3lame -sameq SOUND.mp3
+
+Cut certain length sound out to be used, for example from 5:30 with duration
+01:05.88:
+
+    $ ffmpeg -i SOUND.mp3 -vn -acodec libmp3lame -ss 00:05:30 -t 00:01:05.88 OUTPUT.mp3
+
+
+sound effects
+-------------
+
+Add 3 seconds fade in and 5 seconds fade out for an 50 seconds mp3:
+
+    $ sox input.mp3 output.mp3 fade t 3 50 5
+
+
+Merge sound and video
+---------------------
+
+Use AVI format to merge, I remember others (such mpg) give me a lot pain.
+
+
+Join pieces of clips together
+-----------------------------
+
+Change to mpg to join, this time AVI give me a lot pain.
+
+
+Time is wrong, joined video can not fast forward or the like:
+
+Convert it again, such as convert to FLV, after ffmpeg converting, the result can
+be played ok.
+
+    $ ffmpeg -i INPUT.mpg -sameq OUTPUT.flv
+
+generate one image video
+------------------------
+
+This kill me hours:
+
+
+ffmpeg -y -loop_input  -f image2  -i onepage640-480.png  -s 320x240 -r 25  -t 510    onepage.mp4
+
+#
+#mencoder mf://onepage.jpg -o onepageout.avi -ovc lavc -lavcopts vcodec=mjpeg -audiofile 5555.mp3 -oac copy -fps 1/453457 -ofps 30
+#
+
+#for x in `seq 1 18138`; do cat onepage.jpg; done | mencoder -o out.avi -fps 1 -ovc lavc -demuxer lavf -lavfdopts format=mjpeg -audiofile 5_hour_epic_music_mega_mix.mp3 -oac copy -
+
+one online doc:
+
+I needed to generate a video from a single source image only - not an image
+sequence.
+
+Here's how to do it with ffmpeg:
+
+The generic form (I've used bash-syntax style $XXX variable names):
+Code:
+
+ffmpeg -loop_input -f image2 -i $INPUT_IMAGE -r $FPS -vframes $DURATION -an -vcodec $VIDEO_CODEC -pix_fmt $COLOR_SPACE $OUTPUT_VIDEO
+
+
+For example, your image is called "signal_placeholder.png" and you want to
+create a video with 25 frames per second (fps), a duration of 1 Minute (=1500
+frames), Video codec "FFv1", no audio and colorspace for default SD PAL video
+(=YUV 4:2:2): Code:
+
+ffmpeg -loop_input -f image2 -i signal_placeholder.png -r 25 -vframes 1500 -an -vcodec ffv1 -pix_fmt yuv422p output.avi
+
+
+If you prefer to have the duration in seconds rather than frames, you can
+replace the "-vframes" argument with "-t".
+
+
+merge mp3s
+----------
+To merge multiple mp3 files into one, use sox like this:
+
+    sox –combine sequence input1.mp3 input2.mp3 … output.wav
+
+I’m outputing to wav because if you try to output to mp3, you get
+
+    SoX was compiled without MP3 encoding support
+
+which is already reported as bug #223783
+
+Afterwards, to convert from wav to mp3, use lame:
+
+    lame input.wav output.mp3
+
+or, to set output to mono, 48kbps, 44.1kHz, VBR:
+
+    lame -v -m m -B 48 -s 44.1 input.wav output.mp3
+
+
+crop video
+----------
+
+
+ffmpeg -i dancing_birds_of_paradise_wild_indonesia_bbc.webm  \
+    -vf  crop=634:330:0:30     dance.webm
+
+    ffmpeg -i in.mp4 -filter:v "crop=out_w,out_h,x,y" out.mp4
+
+Where the options are as follows:
+
+    out_w is the width of the output rectangle
+    out_h is the height of the output rectangle
+    x and y specify the top left corner of the output rectangle
+

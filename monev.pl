@@ -4,13 +4,9 @@ use File::Find qw(find);
 
 my @video_suffix = qw(mpg avi wmv mov asx asf flv );
 
-my $src_dir= '/home/za/Videos/materials/222/';
+my $src_dir= '/tmp/a5/';
 
-#my $src_dir= '/tmp/m22/';
-#my $src_dir= '/home/za/Videos/materials/m201/';
-
-#my $mpg_target_dir = '/tmp/m22/';
-my $mpg_target_dir = '/home/za/Videos/materials/222/';
+my $mpg_target_dir = '/tmp/a5/';
 
 my $subtitled_dir = '/tmp/s5/';
 
@@ -25,8 +21,12 @@ foreach(@vfiles){
     #do_format_transfer($filename);
     #mpg_mv($filename);
 
-    add_subtitle($filename);
+    #add_subtitle($filename);
 
+}
+
+sub get_vbitrate{
+    #my $duration_line = `ffprobe $full_file_name 2>&1 | grep Duration`;
 }
 
 # ----
