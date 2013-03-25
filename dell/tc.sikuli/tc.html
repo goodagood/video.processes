@@ -1,0 +1,792 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }  
+         
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>tup56.sikuli</h2> <a href="tup56.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="cmt"># encoding=utf-8
+</span><span class="kw">import</span> os
+<span class="kw">import</span> os.path
+<span class="kw">import</span> re
+<span class="kw">import</span> time
+<span class="kw">import</span> ConfigParser
+<span class="cmt"># to remove directory and files in it, dangerous operation:
+</span><span class="kw">import</span> shutil
+
+<span class="cmt"># settings:
+</span>base_folder            = <span class="str">'/home/za/myvid/'</span>
+<span class="cmt">#testing:
+</span><span class="cmt">#base_folder            = '/home/za/tmp/testvid/'
+</span>
+config_filename       = os.path.join(base_folder, <span class="str">'robot.cfg'</span>)
+
+config = ConfigParser.ConfigParser()
+config.read(config_filename)
+
+log_filename           = config.get(<span class="str">'basics'</span>, <span class="str">'log_filename'</span>)
+log_filename           = os.path.join(base_folder, log_filename)
+
+chinese_title_filename = config.get(<span class="str">'basics'</span>, <span class="str">'chinese_title_filename'</span>)
+<span class="cmt">#chinese_title_filename = os.path.join(base_folder, chinese_title_filename)
+</span>
+todo_filename          = config.get(<span class="str">'basics'</span>, <span class="str">'todo_filename'</span>)
+<span class="cmt">#todo_filename          = os.path.join(base_folder, todo_filename)
+</span>
+<span class="kw">def</span> set_working_log(section=<span class="str">'working_log'</span>, name=<span class="str">'wlogging'</span>, content=<span class="str">''</span>):
+    config.set(section, name, content)
+
+<span class="kw">def</span> write_working_log():
+    <span class="kw">with</span> open(config_filename, <span class="str">'wb'</span>) <span class="kw">as</span> conffile:
+        config.write(conffile)
+    <span class="kw">pass</span>
+
+<span class="str">'''
+log_filename           = os.path.join(base_folder, 'sikulilog')
+chinese_title_filename = 'cname'
+todo_filename          = 'cname.todo'
+'''</span>
+
+<span class="cmt"># make a unique and readable logfile name
+</span><span class="kw">def</span> get_asctime():
+    asct = time.asctime()
+    <span class="cmt">#ascta = asct.replace(' ', '_')
+</span>    <span class="kw">return</span> asct
+
+<span class="cmt">## Stop using 'cname_file', this file contains file name and Chinese title
+</span><span class="cmt">#  pairs.  It would be easy to put this file inside the same folder of the
+</span><span class="cmt">#  video files.  
+</span><span class="cmt"># -Make it a hard specification to name the file as 'cname', and put inside
+</span><span class="cmt">#  the folder of video files.
+</span><span class="cmt"># -It would be more convinient to write a working file 'cname.todo', it
+</span><span class="cmt">#  will contain the _todo_ things. 
+</span><span class="cmt"># -Remove the video file after uploading, this will save a lot trivial manual
+</span><span class="cmt">#  jobs, and free disk space for more file uploading.
+</span><span class="cmt">##
+</span><span class="str">'''
+filedirs = [
+        {'cname_file':'/home/za/myvid/cnamea', 'basedir':'/home/za/myvid/va/'},
+        {'cname_file':'/home/za/myvid/cnameb', 'basedir':'/home/za/myvid/vb/'},
+        {'cname_file':'/home/za/myvid/cnamec', 'basedir':'/home/za/myvid/vc/'},
+        {'cname_file':'/home/za/myvid/cnamed', 'basedir':'/home/za/myvid/vd/'},
+        {'cname_file':'/home/za/myvid/cnamee', 'basedir':'/home/za/myvid/ve/'},
+        {'cname_file':'/home/za/myvid/cnamef', 'basedir':'/home/za/myvid/vf/'},
+        {'cname_file':'/home/za/myvid/cnameg', 'basedir':'/home/za/myvid/vg/'},
+        {'cname_file':'/home/za/myvid/cnameh', 'basedir':'/home/za/myvid/vh/'},
+        {'cname_file':'/home/za/myvid/cnamei', 'basedir':'/home/za/myvid/vi/'},
+        {'cname_file':'/home/za/myvid/cnamej', 'basedir':'/home/za/myvid/vj/'} ]
+'''</span>
+
+<span class="kw">def</span> writelog(msg=<span class="str">''</span>):
+    <span class="kw">with</span> open(log_filename, <span class="str">'a+'</span>) <span class="kw">as</span> logfile:
+        logfile.write ( <span class="str">"\n"</span>)
+        logfile.write ( get_asctime() )
+        logfile.write ( <span class="str">"\n"</span>)
+        logfile.write ( msg)
+        logfile.write(<span class="str">"\n"</span>)
+    <span class="kw">pass</span>
+
+
+
+<span class="kw">def</span> appendlog(fullfilename, msg=<span class="str">''</span>):
+    <span class="kw">with</span> open(fullfilename, <span class="str">'a+'</span>) <span class="kw">as</span> logfile:
+        logfile.write ( <span class="str">"\n"</span>)
+        logfile.write ( msg)
+        logfile.write(<span class="str">"\n"</span>)
+    <span class="kw">pass</span>
+
+
+<span class="cmt"># deperacated, 0322
+</span><span class="cmt">## get video file names and chinese names of the video from file 'cname?'
+</span><span class="cmt"># -The format of the file 'cname' is: 
+</span><span class="cmt">#      first line of file name, 
+</span><span class="cmt">#      followed by a line of Chinese title,
+</span><span class="cmt">#      and empty line(s).
+</span><span class="cmt">##
+</span><span class="kw">def</span> chop_to_filename_ctitle_pieces(cname_file):
+    <span class="kw">with</span> open(cname_file) <span class="kw">as</span> afile:
+        file2str = afile.read()
+        <span class="kw">pass</span>
+    <span class="kw">if</span> <span class="kw">not</span> file2str:
+        <span class="kw">return</span> []
+
+
+    <span class="cmt"># One line file name, followed by one line Chinese video title, followed
+</span>    <span class="cmt"># by empty line(s):
+</span>    todos = re.split(<span class="str">r'\n[\n\s]*\n'</span>, file2str)
+
+    <span class="cmt"># chop the file text to piece of one file name plus chinese name of the
+</span>    <span class="cmt"># video
+</span>    chops = []
+
+    <span class="kw">for</span> p <span class="kw">in</span> todos:
+        lines = p.split(<span class="str">'\n'</span>)
+        <span class="cmt"># filter out empty lines:
+</span>        my_lines = filter( <span class="kw">lambda</span> x: x.strip(), lines)
+
+        <span class="cmt"># 1 line: name of the file
+</span>        <span class="cmt"># 2 line: chinese name of it
+</span>        <span class="cmt"># If it's not two lines pair, we drop it:
+</span>        <span class="kw">if</span> len(my_lines) == <span class="dig">2</span>:
+            one = dict(name=my_lines[<span class="dig">0</span>], cname=my_lines[<span class="dig">1</span>])
+            chops.append(one)
+        <span class="kw">pass</span>
+
+    <span class="kw">return</span> chops
+
+
+<span class="kw">def</span> start_firefox():
+    <span class="str">'''
+    if exists(Pattern("firefox_on_desktop.png").targetOffset(-156,0)):
+        doubleClick(Pattern("firefox_on_desktop.png").targetOffset(-156,0))
+        #doubleClick(Pattern("firefox_on_desktop.png").targetOffset(-156,0))
+    
+    '''</span>
+
+    <span class="cmt">#type(KeyModifier.ALT, Key.F2)
+</span>    <span class="cmt">#wait(5)
+</span>    <span class="cmt">#type(Key.ESC)
+</span>    <span class="cmt">#type("firefox 'http://goodagood.56.com'")
+</span>    <span class="cmt">#type(Key.ENTER)
+</span>
+    App.open(<span class="str">"firefox http://upload.56.com/v/"</span>)
+    <span class="skw">wait</span>(<span class="dig">60</span>)
+    <span class="kw">while</span> <span class="kw">not</span> exists(<img src="small_56logo_on_tabbar.png" />):
+        <span class="skw">type</span>(<span class="str">'r'</span>)
+        <span class="skw">wait</span>(<span class="dig">10</span>)
+
+    <span class="skw">type</span>(<span class="str">":tabonly"</span>)
+    <span class="skw">type</span>(Key.ENTER)
+
+    <span class="kw">if</span> exists(<img src="fresh_black_upload_file.png" />):
+        <span class="skw">click</span>(<img src="fresh_black_upload_file.png" />)
+        <span class="skw">wait</span>(<span class="dig">150</span>)
+        <span class="kw">if</span> exists(<img src="big_red_56select_file_upload.png" />):
+
+            <span class="skw">type</span>(<span class="str">":tabonly"</span>)
+            <span class="skw">type</span>(Key.ENTER)
+            <span class="kw">if</span> exists(Pattern(<img src="confirm_close_other_tabs.png" />).targetOffset(<span class="dig">31</span>,<span class="dig">0</span>)):
+                <span class="skw">type</span>(Key.ENTER)
+                <span class="skw">wait</span>(<span class="dig">3</span>)
+            <span class="kw">if</span> exists(Pattern(<img src="confirm_close_other_tabs.png" />).targetOffset(<span class="dig">31</span>,<span class="dig">0</span>)):
+                <span class="skw">click</span>(Pattern(<img src="confirm_close_other_tabs.png" />).targetOffset(<span class="dig">31</span>,<span class="dig">0</span>))
+                <span class="skw">wait</span>(<span class="dig">3</span>)
+            <span class="skw">wait</span>(<span class="dig">5</span>)
+        <span class="kw">else</span>:
+            exit(<span class="dig">1</span>)
+            <span class="kw">pass</span>
+    <span class="kw">else</span>:
+        writelog(<span class="str">"firefox start and prepare to uploading problem"</span>)
+        exit(<span class="dig">1</span>)
+
+    <span class="kw">pass</span>
+
+<span class="kw">def</span> stop_firefox():
+    App.close(<span class="str">"firefox"</span>)
+    <span class="skw">wait</span>(<span class="dig">30</span>)
+
+<span class="kw">def</span> restart_firefox():
+    stop_firefox()
+    <span class="cmt">#wait(30)
+</span>    start_firefox()
+    <span class="cmt">#wait(60)
+</span>    <span class="kw">pass</span>
+
+<span class="kw">def</span> check_uploading(fullfilename):
+    <span class="kw">if</span> exists(<img src="or_upload_morea.png" />):
+        <span class="kw">return</span> <span class="str">'finished'</span>
+
+    <span class="kw">if</span> exists(<img src="sorry_56io_errora.png" />):
+        <span class="skw">click</span>(Pattern(<img src="cancel_56ioerror.png" />).targetOffset(<span class="dig">8</span>,-<span class="dig">6</span>))
+        writelog(<span class="str">"error: "</span> + fullfilename)
+        <span class="kw">return</span> <span class="str">"error_io_56"</span>
+
+    <span class="kw">if</span> exists(<img src="Stopscript_jserror.png" />):
+        <span class="skw">click</span>(<img src="Stopscript_jserror.png" />)
+        writelog(<span class="str">"error: "</span> + fullfilename)
+        <span class="kw">raise</span> Exception(<span class="str">"busy js script? error: "</span> + fullfilename)
+        <span class="cmt">#return "error_js_stop_script"
+</span>
+
+    <span class="cmt"># If upload error:
+</span>    <span class="kw">if</span> exists(<img src="info_might_error.png" />):
+        writelog(<span class="str">"error: "</span> + fullfilename)
+        <span class="cmt"># try small cross:
+</span>        <span class="skw">click</span>(<img src="1362832524146.png" />)
+
+        <span class="cmt">#click("1362414218067.png")
+</span>        <span class="kw">return</span> <span class="str">"error_io_56"</span>
+
+    <span class="kw">if</span> exists(Pattern(<img src="uploading_flag.png" />).similar(<span class="dig">0.88</span>)):
+        <span class="kw">return</span> <span class="str">"uploading"</span>
+
+    <span class="kw">return</span> <span class="str">'finished'</span>
+
+
+<span class="kw">def</span> safe_guards(cname):
+    <span class="cmt"># safeguard, the following clicks must be done to pass.
+</span>    <span class="cmt"># If failed to select 'tag', do again:
+</span>    <span class="kw">if</span> exists(<img src="i.png" />):
+        <span class="cmt">#click("gcodagcoc.png")
+</span>        <span class="skw">click</span>(<img src="i.png" />)
+        <span class="skw">type</span>(<span class="str">"goodagood "</span>)
+
+    <span class="kw">if</span> exists(Pattern(<img src="red_tag_warning.png" />).targetOffset(<span class="dig">1</span>,<span class="dig">8</span>)):
+        <span class="skw">click</span>(Pattern(<img src="red_tag_warning.png" />).targetOffset(<span class="dig">1</span>,<span class="dig">8</span>))
+        <span class="skw">type</span>(<span class="str">"goodagood "</span>)
+
+    <span class="kw">if</span> exists(<img src="iiEiB.png" />):
+        <span class="skw">doubleClick</span>(Pattern(<img src="HQ.png" />).targetOffset(<span class="dig">38</span>,<span class="dig">0</span>))
+        <span class="skw">wait</span>(<span class="dig">2</span>)
+        <span class="skw">type</span>(Key.BACKSPACE)
+        <span class="kw">for</span> i <span class="kw">in</span> range(<span class="dig">200</span>):
+            <span class="skw">type</span>(Key.DELETE)
+        paste(cname)
+        <span class="cmt">#click("gcodagcoc.png")
+</span>
+    <span class="cmt"># If failed to select 'category', do again:
+</span>    <span class="kw">if</span> exists(<img src="9n.png" />):
+        <span class="skw">click</span>(<img src="9n.png" />)
+
+        <span class="cmt">#wait("1362294194835.png", 22)
+</span>        <span class="cmt">#click("1362292270230.png")
+</span>        <span class="cmt">#wait("Bi7i.png",22)
+</span>
+        <span class="skw">wait</span>(<img src="ifiHHHi.png" />,<span class="dig">22</span>)
+        <span class="skw">click</span>(<img src="ifiHHHi.png" />)
+        <span class="kw">pass</span>
+
+    <span class="cmt"># 56.com get length limit:
+</span>    <span class="kw">if</span> exists(<img src="iIBFEF60f.png" />):
+        <span class="skw">doubleClick</span>(Pattern(<img src="HQ.png" />).targetOffset(<span class="dig">38</span>,<span class="dig">0</span>))
+        <span class="kw">for</span> i <span class="kw">in</span> range(<span class="dig">200</span>):
+            <span class="skw">type</span>(Key.DELETE)
+
+        paste(cname)
+        <span class="kw">pass</span>
+    <span class="cmt"># ^ The above is safeguards.
+</span>
+
+<span class="kw">def</span> fileselector(fullfilename):
+    <span class="skw">wait</span>(<img src="QgmengpE.png" />,<span class="dig">90</span>)
+
+
+    <span class="cmt">## file selector might change:
+</span>    <span class="kw">if</span> exists(<img src="filesystem.png" />):
+        <span class="skw">click</span>(<img src="filesystem.png" />)
+        <span class="cmt">#type('/')
+</span>    <span class="kw">else</span>:
+        <span class="cmt">#wait("IEza.png", 60)
+</span>        <span class="skw">click</span>(<img src="IEza.png" />)
+
+    <span class="cmt">#if exists("Location.png"):
+</span>    <span class="cmt">#    click("Location-1.png")
+</span>
+
+    <span class="skw">type</span>(fullfilename)
+    <span class="skw">type</span>(Key.ENTER)
+
+
+    <span class="kw">pass</span>
+
+<span class="kw">def</span> upload_one_file(fullfilename, filename, cname, long_cname=<span class="str">''</span>):
+    <span class="kw">if</span> long_cname == <span class="str">''</span>:
+        long_cname = cname
+
+    <span class="skw">wait</span>(<img src="125DiJ4.png" />,<span class="dig">240</span>)
+    <span class="skw">click</span>(<img src="to_select_video2upload_DiJ4-1.png" />)
+    <span class="cmt">#waitVanish("125DiJ4-1.png", 30)  #after click, this should vanish?
+</span>
+
+    fileselector(fullfilename)
+
+    <span class="skw">wait</span>(<img src="save_128.png" />, <span class="dig">128</span>)
+
+    <span class="skw">doubleClick</span>(Pattern(<img src="HQ.png" />).targetOffset(<span class="dig">38</span>,<span class="dig">0</span>))
+    <span class="skw">wait</span>(<span class="dig">2</span>)
+    <span class="skw">type</span>(Key.BACKSPACE)
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="dig">200</span>):
+        <span class="skw">type</span>(Key.DELETE)
+    paste(cname)
+
+    <span class="cmt"># sometime, tag of 'goodagood' not appears
+</span>    <span class="kw">if</span> exists(<img src="goodagood.png" />):
+        <span class="skw">click</span>(<img src="goodagood.png" />)
+
+    <span class="skw">wait</span>(<span class="dig">3</span>)
+    <span class="skw">click</span>(<img src="2B.png" />)
+    <span class="cmt">#click("TTaiiF1f.png")
+</span>    <span class="skw">click</span>(Pattern(<img src="Mi.png" />).targetOffset(<span class="dig">51</span>,<span class="dig">0</span>))
+
+    <span class="skw">wait</span>(<span class="dig">3</span>)
+
+    paste(long_cname)
+    <span class="skw">type</span>(Key.ENTER)
+    paste(filename)
+    <span class="skw">type</span>(Key.ENTER)
+
+    <span class="skw">click</span>(<img src="9n.png" />)
+    <span class="cmt">#wait("1362294194835.png", 22)
+</span>    <span class="cmt">#click("1362292270230.png")
+</span>    <span class="cmt">#wait("travel_catlog.png",22)
+</span>    <span class="cmt">#click("travel_catlog.png")
+</span>
+    <span class="skw">wait</span>(<img src="zongyi_catlog.png" />,<span class="dig">22</span>)
+    <span class="skw">click</span>(<img src="zongyi_catlog.png" />)
+
+    <span class="cmt"># safe guards:
+</span>    safe_guards(cname)
+
+    <span class="cmt"># save all info:
+</span>    <span class="skw">click</span>(<img src="save_l238.png" />)
+
+    <span class="cmt"># When there is a progress bar changing, do let sikuli waiting dynamic images:    
+</span>    <span class="skw">wait</span>(<span class="dig">3</span>)  <span class="cmt"># can we wait less?</span>
+
+    <span class="cmt"># This works fine in normal, but failed oncy to catch error:
+</span>    <span class="cmt"># waitVanish("E19IJfFP4EJ9.png", 6800)
+</span>
+    <span class="cmt"># try to check more area, BUT failed to found uploading error:    
+</span>    <span class="cmt">#waitVanish("9I9IJfFP1EJI.png", 6800)
+</span>    <span class="cmt"># try to include the more text in the pic. :
+</span>    <span class="cmt">#waitVanish("iI7FPUl9IJf4.png", 6800)
+</span>
+    state = check_uploading(fullfilename)
+    <span class="kw">while</span> state.startswith(<span class="str">"uploading"</span>):
+        time.<span class="skw">sleep</span>(<span class="dig">5</span>)
+        state = check_uploading(fullfilename)
+    <span class="kw">if</span> state != <span class="str">"finished"</span>:
+        <span class="kw">return</span> <span class="str">'error'</span>
+
+
+    <span class="skw">wait</span>(<img src="keepuploadinga.png" />, <span class="dig">256</span>)
+    <span class="skw">click</span>(<img src="toclick_to_uploading.png" />)  <span class="cmt"># failed a few time, not found this</span>
+    <span class="kw">return</span> <span class="str">'finished'</span>
+
+
+<span class="kw">def</span> write_todo_file(content_start, dir_start, contents):
+    base       = filedirs[dir_start][<span class="str">'basedir'</span>]
+    todo_file = base + todo_filename
+
+    <span class="kw">with</span> open(todo_file, <span class="str">'w+'</span>) <span class="kw">as</span> todo:
+        <span class="kw">for</span> c <span class="kw">in</span> contents[content_start+<span class="dig">1</span>: ]:
+            todo.write( <span class="str">"%s\n%s\n\n"</span>%(c[<span class="str">'name'</span>], c[<span class="str">'cname'</span>]))
+    <span class="kw">pass</span>
+
+<span class="kw">def</span> get_filename_title_pairs(number=<span class="dig">0</span>):
+    <span class="cmt">#cname_file = filedirs[number]['cname_file']
+</span>
+    <span class="cmt">## Note, we need the base dir name ends with '/':
+</span>    base       = filedirs[number][<span class="str">'basedir'</span>]
+    cname_file = base + chinese_title_filename
+    todo_file  = base + todo_filename
+
+    <span class="kw">if</span> os.path.exists( todo_file ):
+        filename_title_pairs = chop_to_filename_ctitle_pieces( todo_file )
+        <span class="kw">for</span> one <span class="kw">in</span> filename_title_pairs:
+            one[<span class="str">'fullfilename'</span>] = base + one[<span class="str">'name'</span>]
+        <span class="kw">return</span> filename_title_pairs
+
+    <span class="cmt"># If arrived here, we are going to use cname_file freshly:
+</span>    <span class="kw">if</span> <span class="kw">not</span> os.path.exists( cname_file ):
+        writelog ( <span class="str">"file-not-exist: "</span> + cname_file)
+        <span class="kw">return</span> []
+
+    filename_title_pairs = chop_to_filename_ctitle_pieces(cname_file)
+    <span class="kw">for</span> one <span class="kw">in</span> filename_title_pairs:
+        one[<span class="str">'fullfilename'</span>] = base + one[<span class="str">'name'</span>]
+    <span class="kw">return</span> filename_title_pairs
+
+
+<span class="kw">def</span> get_new_folder(base=<span class="str">'/home/za/myvid'</span>):
+    dirs_in_base_folder = [ os.path.join(base, name) <span class="kw">for</span> name <span class="kw">in</span>
+            os.listdir(base) <span class="kw">if</span> os.path.isdir(
+                os.path.join(base, name))]
+    dirs_in_base_folder.sort()
+    <span class="kw">if</span> len(dirs_in_base_folder) &gt; <span class="dig">0</span>:
+        <span class="kw">return</span> dirs_in_base_folder[<span class="dig">0</span>]
+    <span class="kw">return</span> None
+
+
+<span class="kw">def</span> get_folder_from_working_log():
+    folder = None
+    <span class="kw">try</span>:
+        folder = config.get(<span class="str">'working_log'</span>, <span class="str">'folder'</span>)
+    <span class="kw">except</span>:
+        folder = None
+        <span class="kw">pass</span>
+
+    <span class="kw">if</span> folder == <span class="str">'unknown'</span>:
+        <span class="kw">return</span> None
+
+    <span class="kw">return</span> folder
+
+
+<span class="kw">def</span> get_folder(base_folder):
+    folder =  get_folder_from_working_log()
+    <span class="kw">if</span> <span class="kw">not</span> folder <span class="kw">or</span> <span class="kw">not</span> os.path.isdir(folder):
+        folder = get_new_folder(base_folder)
+
+    config.set(<span class="str">'working_log'</span>, <span class="str">'folder'</span>, folder)
+    write_working_log()
+    <span class="kw">return</span> folder
+
+
+<span class="kw">def</span> stop_signal_comes():
+    stop = config.getint(<span class="str">'basics'</span>, <span class="str">'stop_at'</span>)
+    <span class="kw">if</span> stop == <span class="dig">1</span>:
+        <span class="kw">return</span> True
+
+    <span class="kw">if</span> stop == <span class="dig">0</span>:
+        <span class="kw">return</span> False
+    <span class="kw">else</span>:
+        stop = stop -<span class="dig">1</span>
+        config.set(<span class="str">'basics'</span>, <span class="str">'stop_at'</span>, stop)
+        write_working_log()
+
+    <span class="kw">return</span> False
+
+
+<span class="cmt">## get video file names and chinese names of the video from file 'cname'
+</span><span class="cmt"># -The format of the file 'cname' is: 
+</span><span class="cmt">#      first line of file name, 
+</span><span class="cmt">#      followed by a line of Chinese title,
+</span><span class="cmt">#      and empty line(s).
+</span><span class="cmt">##
+</span><span class="kw">def</span> read_chinese_title(cname):
+    <span class="str">"""read chinese title from 'cname' file.
+
+    cname : the file contains chinese title for each video file.
+    """</span>
+    <span class="kw">with</span> open(cname) <span class="kw">as</span> afile:
+        file2str = afile.read()
+        <span class="kw">pass</span>
+    <span class="kw">if</span> <span class="kw">not</span> file2str:
+        <span class="kw">return</span> []
+
+
+    <span class="cmt"># One line file name, followed by one line Chinese video title, followed
+</span>    <span class="cmt"># by empty line(s):
+</span>    todos = re.split(<span class="str">r'\n[\n\s]*\n'</span>, file2str)
+
+    <span class="cmt"># chop the file text to piece of 
+</span>    <span class="cmt"># one file name plus chinese name of the video
+</span>    filename_ctitle_dict = {}
+
+    <span class="kw">for</span> p <span class="kw">in</span> todos:
+        lines = p.split(<span class="str">'\n'</span>)
+        <span class="cmt"># filter out empty lines:
+</span>        my_lines = filter( <span class="kw">lambda</span> x: x.strip(), lines)
+
+        <span class="cmt"># 1 line: name of the file
+</span>        <span class="cmt"># 2 line: chinese name of it
+</span>        <span class="cmt"># If it's not two lines pair, we drop it:
+</span>        <span class="kw">if</span> len(my_lines) == <span class="dig">2</span>:
+            <span class="cmt">#one = dict(name=my_lines[0], cname=my_lines[1])
+</span>            <span class="cmt">#one = {my_lines[0] : my_lines[1]}
+</span>            filename_ctitle_dict[my_lines[<span class="dig">0</span>]] = my_lines[<span class="dig">1</span>]
+        <span class="kw">pass</span>
+
+    <span class="kw">return</span> filename_ctitle_dict
+
+
+<span class="kw">def</span> prepare_files(folder):
+    files = os.listdir(folder)
+
+    title_filename = os.path.join(folder, chinese_title_filename)
+    kv_name_title = read_chinese_title(title_filename)
+
+    pieces = []
+    <span class="kw">for</span> filename <span class="kw">in</span> files:
+        <span class="kw">if</span> <span class="kw">not</span> kv_name_title.has_key(filename):
+            <span class="kw">continue</span>
+
+        chinese_title = kv_name_title[filename]
+
+        longtitle = chinese_title
+        ctitle    = chinese_title
+        <span class="kw">if</span> len(chinese_title) &gt; <span class="dig">60</span>:
+            ctitle    = chinese_title[:<span class="dig">58</span>]
+        <span class="kw">if</span> kv_name_title.has_key(filename):
+            one = dict(filename      = filename,
+                       chinese_title = ctitle,
+                       longtitle     = longtitle,
+                       fullfilename  = os.path.join(folder, filename))
+            pieces.append(one)
+
+    <span class="kw">return</span> pieces
+    <span class="kw">pass</span>
+
+
+<span class="kw">def</span> mocking(message=<span class="str">''</span>, duration=<span class="dig">1</span>, raise_exception=False):
+    <span class="skw">popup</span>( <span class="str">"I am mocking...%s"</span>%message )
+    <span class="kw">if</span> raise_exception:
+        <span class="kw">raise</span> Exception(message)
+    time.<span class="skw">sleep</span>(duration)
+
+
+<span class="kw">def</span> transfer_to_error_folder(fullfilename, filename, long_cname):
+    errorv_folder = config.get(<span class="str">'basics'</span>, <span class="str">'errorv_folder'</span>)
+    errorv_log = config.get(<span class="str">'basics'</span>, <span class="str">'errorv_log'</span>)
+
+    newfilename = os.path.join(errorv_folder, filename)
+    os.rename(fullfilename, newfilename)
+
+    msg = <span class="str">"%s\n%s"</span>%(filename, long_cname)
+    appendlog(errorv_log, msg)
+    <span class="kw">pass</span>
+
+<span class="kw">def</span> do_one_file(filename, fullfilename, cname, long_cname):
+    <span class="kw">try</span>:
+        <span class="cmt">#mocking("uploading file and remove it in success, %s %s"%(fullfilename, long_cname))
+</span>
+        state = <span class="str">''</span>
+        <span class="kw">while</span> state != <span class="str">'finished'</span>:
+            state = upload_one_file(fullfilename, filename, cname,long_cname)
+        os.remove(fullfilename)
+
+        <span class="cmt">#write_todo_file(j, startnumber, filename_videotitle_pairs)
+</span>    <span class="kw">except</span>:
+        transfer_to_error_folder(fullfilename, filename, long_cname)
+        <span class="cmt"># move the file to errorv, os.rename()
+</span>
+        logmsg = <span class="str">"exception in uploading file: %s\nwith long_cname: %s \n"</span>%(fullfilename, long_cname)
+        writelog( logmsg)
+        restart_firefox()
+        <span class="kw">pass</span>
+
+    logmsg = <span class="str">"fullfilename: \n"</span> + fullfilename + <span class="str">"\ncname: "</span> + cname
+    writelog( logmsg)
+
+    <span class="kw">pass</span>
+
+
+<span class="kw">def</span> do_one_folder(folder):
+    <span class="cmt"># prepare file informations
+</span>    <span class="cmt"># remove empty folder
+</span>    <span class="cmt"># loop over one file uploading
+</span>
+    <span class="cmt"># no need to record file name, finish one, remove one, 
+</span>    <span class="cmt"># in case error happen, mv the file to 'errorv' folder, and log it.
+</span>
+    file_infos = prepare_files(folder)
+    <span class="kw">for</span> fi <span class="kw">in</span> file_infos:
+        filename = fi[<span class="str">'filename'</span>]
+        fullfilename = fi[<span class="str">'fullfilename'</span>]
+        cname = fi[<span class="str">'chinese_title'</span>]
+        long_cname = fi[<span class="str">'longtitle'</span>]
+
+        do_one_file(filename, fullfilename, cname, long_cname)
+        <span class="kw">pass</span>
+
+    <span class="cmt">## testing, check file_infos:
+</span>    <span class="str">'''
+    with open('/tmp/ttesta', 'wb') as testfile:
+        for fi in file_infos:
+            testfile.write( fi['filename'] + "\n")
+            testfile.write( fi['chinese_title'] + "\n")
+
+            print fi['filename']
+            print fi['fullfilename']
+            print fi['chinese_title']
+            print fi['longtitle']
+    '''</span>
+    <span class="kw">pass</span>
+
+
+<span class="kw">def</span> loop_over_folders():
+    <span class="str">"""This automatically loop over all folders in 'base_folder'
+    """</span>
+    folder = get_folder(base_folder)
+    <span class="kw">while</span> folder:
+        <span class="cmt"># do one folder, and stop at stop signal:
+</span>        <span class="cmt">#popup( "do one folder: %s"%folder)
+</span>        do_one_folder(folder)
+        shutil.rmtree(folder)
+
+        folder = get_folder(base_folder)
+        <span class="kw">pass</span>
+    <span class="kw">pass</span>
+
+
+<span class="cmt">## deprecated, 0322
+</span><span class="kw">def</span> loop_over_dirs(startnumber=<span class="dig">0</span>):
+    <span class="str">"""This loop over dirs specified by list: filedirs
+    """</span>
+    number_of_cname_file = len(filedirs)
+
+    <span class="kw">while</span> True:
+        filename_videotitle_pairs = get_filename_title_pairs(startnumber)
+        <span class="cmt">## stop when no more file need to do:
+</span>        <span class="kw">if</span> <span class="kw">not</span> filename_videotitle_pairs:
+            <span class="kw">return</span>
+
+        number_of_files = len(filename_videotitle_pairs)
+        <span class="kw">for</span> j <span class="kw">in</span> range(number_of_files):
+            f = filename_videotitle_pairs[j]
+
+            fullfilename = f[<span class="str">'fullfilename'</span>]
+            cname = f[<span class="str">'cname'</span>]
+            long_cname = cname
+            <span class="kw">if</span> len(cname) &gt; <span class="dig">60</span>:
+                long_cname = cname
+                cname = cname[:<span class="dig">58</span>]
+            filename = f[<span class="str">'name'</span>]
+
+            state = <span class="str">''</span>
+            <span class="kw">while</span> state != <span class="str">'finished'</span>:
+                state = upload_one_file(fullfilename, filename, cname,
+                        long_cname)
+
+            logmsg = <span class="str">"fullfilename: \n"</span> + fullfilename + <span class="str">"\ncname: "</span> + cname
+            writelog( logmsg)
+
+            write_todo_file(j, startnumber, filename_videotitle_pairs)
+            os.remove(fullfilename)
+
+        startnumber = startnumber + <span class="dig">1</span>
+        <span class="kw">if</span> startnumber == number_of_cname_file:
+            startnumber = <span class="dig">0</span>
+
+
+<span class="cmt">##########################
+</span><span class="cmt">### tests:
+</span>
+<span class="kw">def</span> test_loop_over_dirs(startnumber=<span class="dig">1</span>):
+    <span class="str">""" copy from loop_over_dirs, for testing.
+    """</span>
+    number_of_cname_file = len(filedirs)
+
+    <span class="kw">while</span> True:
+        filename_videotitle_pairs = get_filename_title_pairs(startnumber)
+        <span class="kw">if</span> <span class="kw">not</span> filename_videotitle_pairs:
+            <span class="kw">return</span>
+
+        number_of_files = len(filename_videotitle_pairs)
+
+        <span class="kw">for</span> j <span class="kw">in</span> range(number_of_files):
+            f = filename_videotitle_pairs[j]
+
+            fullfilename = f[<span class="str">'fullfilename'</span>]
+            cname = f[<span class="str">'cname'</span>]
+            <span class="kw">if</span> len(cname) &gt; <span class="dig">60</span>:
+                cname = cname[:<span class="dig">59</span>]
+            filename = f[<span class="str">'name'</span>]
+
+            <span class="kw">print</span> <span class="str">"fullfilename: %s \n cname: %s \n filename %s \n\n"</span> %(
+                    fullfilename, cname, filename)
+
+            <span class="cmt">#upload_one_file(fullfilename, filename, cname)
+</span>            time.<span class="skw">sleep</span>(<span class="dig">15</span>)
+            <span class="cmt">#os.remove(fullfilename)
+</span>
+            logmsg = <span class="str">"fullfilename: \n"</span> + fullfilename + <span class="str">"\ncname: "</span> + cname
+            writelog( logmsg)
+
+            write_todo_file(j, startnumber, filename_videotitle_pairs)
+
+        startnumber = startnumber + <span class="dig">1</span>
+        <span class="kw">if</span> startnumber == number_of_cname_file:
+            startnumber = <span class="dig">0</span>
+
+    <span class="kw">pass</span>
+
+<span class="kw">def</span> test_config():
+    <span class="skw">popup</span>( <span class="str">"log_filename: %s"</span>%log_filename)
+    <span class="skw">popup</span>( <span class="str">"todo_filename: %s"</span>%todo_filename)
+    <span class="skw">popup</span>( <span class="str">"chinese_title_filename: %s"</span>%chinese_title_filename)
+
+    <span class="cmt">#config.set('working_log', 'filename', 'thisisthefilename')
+</span>    <span class="cmt">#config.set('working_log', 'timelog', get_asctime())
+</span>    <span class="cmt">#write_working_log()
+</span>    <span class="kw">pass</span>
+
+<span class="cmt">## comment out after testing:
+</span><span class="cmt">#test_loop_over_dirs(0)
+</span><span class="cmt">#test_config()
+</span><span class="cmt">#print get_folder()
+</span><span class="cmt">#print prepare_files('/home/za/myvid/aa')
+</span><span class="cmt">#do_one_folder('/home/za/myvid/aa')
+</span><span class="cmt">#loop_over_folders()
+</span><span class="cmt">#start_firefox()
+</span><span class="cmt">#stop_firefox()
+</span><span class="cmt">#restart_firefox()
+</span>
+<span class="cmt">### do the job:
+</span><span class="str">'''
+wait(0)
+# a-0, b-1, c-2, d-3, e-4, f-5, g-6, h-7, i-8, j-9:
+loop_over_dirs(9)
+
+# =&gt;
+start_firefox()
+'''</span>
+loop_over_folders()
+</pre>
+</body>
+</html>

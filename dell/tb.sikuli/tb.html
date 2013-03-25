@@ -1,0 +1,220 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }  
+         
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>tb.sikuli</h2> <a href="tb.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="cmt"># encoding=utf-8
+</span><span class="kw">import</span> os.path
+<span class="kw">import</span> re
+<span class="kw">import</span> time
+
+<span class="cmt"># make a unique and readable logfile name
+</span><span class="kw">def</span> get_asctime():
+    asct = time.asctime()
+    ascta = asct.replace(<span class="str">' '</span>, <span class="str">'_'</span>)
+    <span class="kw">return</span> ascta
+
+logfile = open(<span class="str">'/tmp/sikulilog'</span>, <span class="str">'a+'</span>)
+
+filedir = [
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnamea'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/va/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnameb'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/vb/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnamec'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/vc/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnamed'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/vd/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnamee'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/ve/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnamef'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/vf/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnameg'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/vg/'</span>},
+        {<span class="str">'cname_file'</span>:<span class="str">'/tmp/cnameh'</span>, <span class="str">'basedir'</span>:<span class="str">'/tmp/vh/'</span>} ]
+
+<span class="kw">def</span> writelog(logfile=None, msg=<span class="str">''</span>):
+    <span class="kw">if</span> logfile:
+        logfile.write ( <span class="str">"\n"</span>)
+        logfile.write ( msg)
+        logfile.write(<span class="str">"\n"</span>)
+        <span class="cmt">#logfile.flush()
+</span>    <span class="kw">pass</span>
+
+<span class="cmt">## get video file names and chinese names of the video from file 'cname?'
+</span><span class="kw">def</span> get_vfile_names(cname_file):
+    afile = open(cname_file, <span class="str">'r'</span>)
+    file2str = afile.read()
+    afile.close()
+
+    todos = re.split(<span class="str">r'\n[\n\s]*\n'</span>, file2str)
+
+    <span class="cmt"># chop the file text to piece of one file name plus chinese name of the
+</span>    <span class="cmt"># video
+</span>    chops = []
+    <span class="kw">for</span> p <span class="kw">in</span> todos:
+        lines = p.split(<span class="str">'\n'</span>)
+        my_lines = []
+        <span class="kw">for</span> l <span class="kw">in</span> lines:
+            striped = l.strip()
+            <span class="kw">if</span> striped:
+                my_lines.append(striped)
+                <span class="kw">pass</span>
+            <span class="kw">pass</span>
+
+        <span class="cmt"># 1 line: name of the file
+</span>        <span class="cmt"># 2 line: chinese name of it
+</span>        <span class="kw">if</span> len(my_lines) == <span class="dig">2</span>:
+            one = dict(name=my_lines[<span class="dig">0</span>], cname=my_lines[<span class="dig">1</span>])
+            chops.append(one)
+        <span class="kw">pass</span>
+
+    <span class="kw">return</span> chops
+
+
+<span class="kw">def</span> upload_one_file(fullfilename, filename, cname):
+
+
+    <span class="skw">wait</span>(<img src="125DiJ4.png" />,<span class="dig">180</span>)
+    <span class="skw">click</span>(<img src="125DiJ4-1.png" />)
+    <span class="skw">wait</span>(<img src="Rec.png" />,<span class="dig">180</span>)
+    <span class="skw">click</span>(<img src="RecentlyUsed.png" />)
+
+
+    <span class="skw">type</span>(<span class="str">'/'</span>)
+    <span class="skw">type</span>(fullfilename)
+    <span class="skw">type</span>(Key.ENTER)
+
+
+
+    <span class="skw">wait</span>(<img src="1362291927720.png" />, <span class="dig">60</span>)
+    <span class="skw">click</span>(Pattern(<img src="HQ.png" />).targetOffset(<span class="dig">38</span>,<span class="dig">0</span>))
+
+    paste(f[<span class="str">'cname'</span>])
+
+    <span class="skw">click</span>(<img src="goodagood.png" />)
+    <span class="skw">click</span>(<img src="2B.png" />)
+    <span class="skw">click</span>(<img src="TTaiiF1f.png" />)
+
+    paste(f[<span class="str">'cname'</span>])
+    <span class="skw">type</span>(Key.ENTER)
+    paste(f[<span class="str">'name'</span>])
+    <span class="skw">type</span>(Key.ENTER)
+
+    <span class="skw">click</span>(<img src="9n.png" />)
+    <span class="skw">wait</span>(<img src="1362294194835.png" />, <span class="dig">22</span>)
+
+    <span class="skw">click</span>(<img src="1362292270230.png" />)
+    <span class="skw">click</span>(<img src="1362292324719.png" />)
+
+    waitVanish(<img src="1362291940020.png" />, <span class="dig">18000</span>)
+    <span class="skw">wait</span>(<img src="1362292473113.png" />, <span class="dig">60</span>)
+    <span class="skw">click</span>(<img src="1362292480018.png" />)
+
+
+
+    <span class="cmt">#---------
+</span>    <span class="skw">click</span>(<img src="here.png" />)
+    <span class="skw">type</span>(Key.ENTER)
+    <span class="skw">type</span>(<span class="str">'fullfilename : '</span>)
+    paste(fullfilename)
+    <span class="skw">type</span>(Key.ENTER)
+    <span class="skw">type</span>(<span class="str">'cname : '</span>)
+    paste(cname)
+    <span class="skw">type</span>(Key.ENTER)
+
+    <span class="cmt"># |||
+</span>    <span class="kw">pass</span>
+
+
+<span class="kw">def</span> loop_over_dirs():
+    i = <span class="dig">0</span>
+    number_of_cname_file = len(filedir)
+
+    <span class="kw">while</span> True:
+
+        cname_file = filedir[i][<span class="str">'cname_file'</span>]
+        base       = filedir[i][<span class="str">'basedir'</span>]
+        <span class="kw">if</span> <span class="kw">not</span> os.path.exists( cname_file ):
+            writelog ( logfile, <span class="str">"file-not-exist: "</span> + cname_file)
+            logfile.close()
+            <span class="kw">return</span>
+
+        vfilename_cnames = get_vfile_names(cname_file)
+
+        <span class="kw">for</span> f <span class="kw">in</span> vfilename_cnames:
+            fullfilename = base + f[<span class="str">'name'</span>]
+            cname = f[<span class="str">'cname'</span>]
+            filename = f[<span class="str">'name'</span>]
+            <span class="cmt">#...
+</span>            upload_one_file(fullfilename, filename, cname)
+
+            logmsg = <span class="str">"fullfilename: \n"</span> + fullfilename + <span class="str">"\ncname: "</span> + cname
+            writelog(logfile, logmsg)
+
+        i = i + <span class="dig">1</span>
+        <span class="kw">if</span> i == number_of_cnameloop_over_dirs()
+logfile.close()
+</pre>
+</body>
+</html>
