@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*- 
 # # perl 
 
-#my $src_dir= '/home/za/Videos/materials/223b/';
-#my $src_dir= '/home/za/Videos/materials/sky-time-lapse224/';
-#my $src_dir= '/tmp/tla/';
-my $src_dir= '/home/za/vids/src/';
+#my $src_dir= '/home/za/vids/src/';
+my $src_dir= '/mnt/sadia/';
+
 
 #my $subtitled_dir = '/tmp/s5/';
-my $subtitled_dir = '/home/za/vids/subed/';
+#my $subtitled_dir = '/home/za/vids/subed/';
+my $subtitled_dir = '/mnt/subed/';
 
-my $subtitle = '/home/za/workspace/videos/asrt.srt';
+#my $subtitle = '/home/za/workspace/videos/asrt.srt';
+my $subtitle = '/home/ubuntu/workspace/video.processes/asrt.srt';
 
 # ----
 my $vfiles = `ls $src_dir`;
@@ -21,7 +22,7 @@ foreach(@vfiles){
     my $filename = $_;
 
     add_subtitle($filename);
-    sleep 90;
+    sleep 10;
 
 }
 
