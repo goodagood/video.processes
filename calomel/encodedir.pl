@@ -100,12 +100,13 @@ sub add_subtitle{
 
     #print "$full_input_name  -->  $full_output_name  \n";
 
-    my $pass1cmd = "mencoder  $full_input_name -o /dev/null -oac lavc -ovc lavc -lavcopts autoaspect:vpass=1 -sub $subtitle  -utf8 -font 'WenQuanYi Micro Hei' ";
+    ## threads=8 !!
+    my $pass1cmd = "mencoder  $full_input_name -o /dev/null -oac lavc -ovc lavc -lavcopts autoaspect:threads=8:vpass=1 -sub $subtitle  -utf8 -font 'WenQuanYi Micro Hei' ";
 
     # br=512 is not allowed in mp2 error:
     #my $pass2cmd = "mencoder  $full_input_name -o $full_output_name -oac lavc -ovc lavc -lavcopts vbitrate=15900:abitrate=512:autoaspect:vpass=2 -sub $subtitle  -utf8 -font 'WenQuanYi Micro Hei' ";
 
-    my $pass2cmd = "mencoder  $full_input_name -o $full_output_name -oac lavc -ovc lavc -lavcopts vbitrate=15900:autoaspect:vpass=2 -sub $subtitle  -utf8 -font 'WenQuanYi Micro Hei' ";
+    my $pass2cmd = "mencoder  $full_input_name -o $full_output_name -oac lavc -ovc lavc -lavcopts vbitrate=15900:autoaspect:threads=8:vpass=2 -sub $subtitle  -utf8 -font 'WenQuanYi Micro Hei' ";
 
     #`$pass1cmd`;
     #`$pass2cmd`;
