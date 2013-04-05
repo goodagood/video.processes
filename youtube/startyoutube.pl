@@ -24,6 +24,7 @@ if(! -e $dirname ){
 }
 
 `cp /home/ubuntu/workspace/video.processes/youtube/linf.pl /home/ubuntu/workspace/video.processes/youtube/ygv.pl $dirname`;
+`cp /home/ubuntu/workspace/video.processes/youtube/autoyoutubedl.pl     $dirname`;
 
 
 if ( -e '/tmp/fha' ){
