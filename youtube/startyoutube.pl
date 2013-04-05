@@ -23,7 +23,8 @@ if(! -e $dirname ){
 	`mkdir $dirname`;
 }
 
-`cp /home/ubuntu/tmp/linf.pl /home/ubuntu/tmp/ygv.pl $dirname`;
+`cp /home/ubuntu/workspace/video.processes/youtube/linf.pl /home/ubuntu/workspace/video.processes/youtube/ygv.pl $dirname`;
+
 
 if ( -e '/tmp/fha' ){
 	`grep  -P  '^http.+\$'  /tmp/fha  > /tmp/yhb`;
