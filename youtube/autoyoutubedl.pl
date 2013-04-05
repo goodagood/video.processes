@@ -18,7 +18,8 @@ while(<$vlist>){
 		#`perl ygv.pl $url`;
         #`myyoutube-dl.sh  $url`;
 
-        `youtube-dl  -o '%(title)s_%(autonumber)s.%(ext)s'  --restrict-filenames $url`;
+        #`youtube-dl  -o '%(title)s_%(autonumber)s.%(ext)s'  --restrict-filenames $url`;
+        `youtube-dl  -o '%(title)s.%(ext)s'  --restrict-filenames $url`;
 
 		sleep 5;
 		$ii ++;
