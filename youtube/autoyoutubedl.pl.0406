@@ -22,7 +22,8 @@ while(<$vlist>){
         #`myyoutube-dl.sh  $url`;
 
         #$output = system("youtube-dl  -o '%(title)s.%(ext)s'  --restrict-filenames $url");
-        $output = `youtube-dl  -o '%(title)s%(autonumber)s.%(ext)s' --write-description  --restrict-filenames $url 2>&1 `;
+        #$output = `youtube-dl  -o '%(title)s.%(ext)s'  --restrict-filenames $url 2>&1 `;
+        $output = `youtube-dl  -o '%(title)s%(autonumber)s.%(ext)s'  --restrict-filenames $url 2>&1 `;
         print "-----------------\n";
         print $output . "\n";
         if ($output !~ /\[download\]/){
@@ -30,7 +31,7 @@ while(<$vlist>){
             print $redofile "$url";
         }
 
-        sleep 15;
+        sleep 35;
         $ii ++;
     }
 }
