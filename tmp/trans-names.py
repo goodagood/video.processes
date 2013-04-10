@@ -11,15 +11,15 @@ from gtrans import quick_translate, quick_detect
 
 folder = '/home/za/myvid/amis'
 
+def getall_names( filename = '/tmp/a'):
+    """get a list of names from a file
+    """
+    #fns = os.listdir(folder)
+    with open(filename, 'rb') as namefile:
+        string = namefile.read()
+        ss = string.split("\n")
 
-def get_filenames_in_folder( folder = '/home/za/myvid/amis'):
-    fns = os.listdir(folder)
-    return fns
-
-
-def getall_webm( folder = '/home/za/myvid/amis'):
-    fns = os.listdir(folder)
-    return fns
+    return ss
 
 
 def refit_filenames():
@@ -66,8 +66,8 @@ def refit_filename(name):
     return refit
 
 
-def make_cname_file( folder = '/home/za/myvid/amis', out_file='cname'):
-    filenames = getall_webm(folder)
+def trans_cname( folder = '/tmp', out_file='cname'):
+    filenames = getall_names()
 
     name_cname = []
     for fn in filenames:
@@ -107,6 +107,9 @@ def make_cname_file( folder = '/home/za/myvid/amis', out_file='cname'):
 
 
 if __name__ == "__main__":
+    #print getall_names()
+    trans_cname()
+"""
     print sys.argv[1:]
 
     if len(sys.argv) > 1:
@@ -124,4 +127,4 @@ if __name__ == "__main__":
     with codecs.open('/tmp/aafutf', mode='w+', encoding='utf-8') as f:
         f.write(u'阿飞点卡 ASDF')
         '''
-
+"""
