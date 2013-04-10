@@ -1,0 +1,135 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }  
+         
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>c.sikuli</h2> <a href="c.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="cmt"># encoding=utf-8
+</span><span class="cmt">#import jya
+</span><span class="cmt">#from jya import get_file_names
+</span>
+
+
+
+
+<span class="kw">import</span> re
+
+
+
+<span class="kw">def</span> get_file_names():
+    afile = open(<span class="str">"/tmp/anl"</span>, <span class="str">'r'</span>)
+    file2str = afile.read()
+    afile.close()
+
+    todos = re.split(<span class="str">r'\n[\n\s]*\n'</span>, file2str)
+
+    chops = []
+    test_a = []
+    <span class="kw">for</span> p <span class="kw">in</span> todos:
+        lines = p.split(<span class="str">'\n'</span>)
+        my_lines = []
+        <span class="kw">for</span> l <span class="kw">in</span> lines:
+            striped = l.strip()
+            <span class="kw">if</span> striped:
+                my_lines.append(striped)
+                <span class="kw">pass</span>
+            <span class="kw">pass</span>
+
+        test_a.append(my_lines)
+        <span class="cmt"># 1 line: name of the file
+</span>        <span class="cmt"># 2 line: chinese name of it
+</span>        <span class="kw">if</span> len(my_lines) == <span class="dig">2</span>:
+            one = dict(name=my_lines[<span class="dig">0</span>], cname=my_lines[<span class="dig">1</span>])
+            chops.append(one)
+        <span class="kw">pass</span>
+
+    <span class="kw">return</span> chops
+
+<span class="cmt">####################
+</span>base = <span class="str">'/tmp/ttaa/'</span>
+
+<span class="skw">wait</span>(<span class="dig">3</span>)
+files = get_file_names()
+
+<span class="kw">for</span> f <span class="kw">in</span> files:
+
+
+    <span class="cmt">#f0 = files[0]
+</span>    <span class="skw">find</span>(<img src="here.png" />)
+    <span class="skw">click</span>(Pattern(<img src="here-1.png" />).targetOffset(<span class="dig">48</span>,<span class="dig">0</span>))
+    <span class="skw">type</span>(Key.ENTER)
+    <span class="skw">type</span>(<span class="str">'/'</span>)
+
+    fullfilename = base + f[<span class="str">'name'</span>]
+    <span class="skw">type</span>(fullfilename)
+    <span class="skw">type</span>(Key.ENTER)
+    paste(f[<span class="str">'cname'</span>])
+</pre>
+</body>
+</html>
