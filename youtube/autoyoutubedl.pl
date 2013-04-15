@@ -30,7 +30,7 @@ while(<$vlist>){
             print $redofile "$url";
         }
 
-        sleep 15;
+        sleep 35;
         $ii ++;
     }
 }

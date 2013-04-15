@@ -12,110 +12,131 @@ import codecs
 #import gtrans  # google translate tool
 from gtrans import quick_translate, quick_detect
 
-folder = '/home/za/myvid/testc'
-folder = '/mnt/cc/testc'
-
-video_info_file_name = 'cname'
-
 vi_delimit = '---goodagood-video-info-delimit---'
 
-# file writting might fail, before write it to file, pickle the translated
-g_translate_pfile = '/tmp/pickle-make-vinfos'
-
-
 class Tdata(object):
-    folder = '/home/za/myvid/testc'
-    folder = '/mnt/cc/testc'
-
-    video_info_file_name = 'cname'
-
     vi_delimit = '---goodagood-video-info-delimit---'
 
     # file writting might fail, before write it to file, pickle the translated
     pickle_file = '/tmp/pickle-make-vinfos'
 
+    video_info_file_name = 'cname'
 
-    files = []
+    def __init__(self):
+        self.folder = '/mnt/tmp/testc'
+
+        self.filename_list        = []
+        self.original_video_infos = []
+        self.translated_video_infos = []
+
+        self.translating_progress = 0
 
 
-# Do the main job.
-def gather_n_translate_video_info(folder=None):
-    if not folder:
-        return None
-    fns = get_filenames_in_folder(folder)
-    video_infos = gather_vinfo(folder, fns)
+    def write_video_info_file(self):
+        absfn = os.path.join(self.folder, self.video_info_file_name)
+        with codecs.open(absfn, mode='wb', encoding='utf-8') as fh:
+            for vinfo in self.translated_video_infos:
+                for l in vinfo:
+                    #print l
+                    # To make sure it's utf-8, this save me 10hrs!!
+                    if isinstance(l, str):
+                        l = l.decode('utf-8')
+                    fh.write(l)
+                    fh.write("\n")
+                fh.write("\n\n" + self.vi_delimit + "\n\n")
 
-    # save a pickle before writting file, I lost a few times.
-    with open(g_translate_pfile, 'wb') as pf:
-        pickle.dump(video_infos, pf)
-
-    write_video_info_file(folder, video_info_file_name, video_infos)
-    pass
 
 
 # Do the main job, updated 0412
+# The functions will be coupled to class `Tdata`, they accept an instance
+#  of Tdata as data.  This simple the data passing.
 def translate_flat_folder(folder=None):
     if not folder:
         return None
 
-    # restore data from pickled file
-
-    t = Tdata
-    t.filename_list = get_filenames_in_folder(folder)
-    t.original_video_infos = prepare_original_descp(folder, t.filename_list)
+    t = Tdata()
+    t.folder = folder
+    t.filename_list = get_filenames_in_folder(t.folder)
+    print t.filename_list
+    t.original_video_infos = prepare_original_descp(t.folder, t.filename_list)
+    print t.original_video_infos
 
 
     # save a pickle before writting file, I lost a few times.
     with open(t.pickle_file, 'wb') as pf:
         pickle.dump(t, pf)
 
-    #write_video_info_file(folder, video_info_file_name, video_infos)
+    translate_video_info_list(t)
+    t.write_video_info_file()
     pass
+
+
+def continue_translate():
+    """ Continue the failed job, get data from pickle file
+    """
+    # restore data from pickled file
+    t = load_t()
+    if not t:
+        print "Can't load pickled file\n"
+        return
+
+    t.filename_list = get_filenames_in_folder(t.folder)
+    print t.filename_list
+    t.original_video_infos = prepare_original_descp(t.folder, t.filename_list)
+    print t.original_video_infos
+
+
+    # save a pickle before writting file, I lost a few times.
+    with open(t.pickle_file, 'wb') as pf:
+        pickle.dump(t, pf)
+
+    translate_video_info_list(t, start = t.translating_progress)
+    t.write_video_info_file()
+    pass
+
+
+def translate_video_info_list(t, start = 0, nameonly=True):
+
+    total = len(t.original_video_infos)
+    if start == 0:
+        t.translated_video_infos = []
+        t.translating_error = []
+        t.translating_progress = 0
+    else:
+        if len(t.translated_video_infos) > start:
+            t.translated_video_infos = t.translated_video_infos[:start]
+
+    for i in range(start, total):
+        vi  = t.original_video_infos[i]
+        try:
+            cvi = translate_vinfo(vi, nameonly=nameonly)
+        except Exception, e:
+            t.translating_error.append( e )
+            t.translating_error.append( "video info number: %i"%i )
+
+        # Not sure the sequence is same as 'original_video_infos'
+        t.translated_video_infos.append(cvi)
+        t.translating_progress = i
+        pickle_t(t)
+        time.sleep(1)  # my account has 1k/second limit
+    return t.translated_video_infos
+
+
+def pickle_t(t):
+    with open(Tdata.pickle_file, 'wb') as pf:
+        pickle.dump(t, pf)
+
+
+def load_t():
+    with open(Tdata.pickle_file, 'rb') as pf:
+        t = pickle.load(pf)
+        return t
 
 
 def get_filenames_in_folder( folder = '/home/za/myvid/testc'):
     # not recursive
     fns = os.listdir(folder)
     return fns
-
-
-def gather_vinfo(folder, fns):
-    """
-    fns : a list of filenames
-    """
-    description_files = filter(is_description_file, fns)
-
-    for f in description_files:
-        fns.remove(f)
-        pass
-
-    #f_has_no_description : file has no descriptions
-    f_has_no_description = filter(
-            lambda x: x+'.description' not in description_files, fns)
-
-    # 'cname' is the file name I write
-    if 'cname' in f_has_no_description:
-        f_has_no_description.remove('cname')
-
-    #print "\n".join(description_files)
-    #print "\n".join(f_has_no_description)
-
-    vinfos = []
-    for f in description_files:
-        lines = gather_description(folder, f)
-        vinfos.append(lines)
-        pass
-
-    for f in f_has_no_description:
-        lines = simple_description(f)
-        vinfos.append(lines)
-        pass
-
-    cvinfos = []
-    for vi in vinfos:
-        cvi = translate_vinfo(vi)
-        cvinfos.append(cvi)
-    return cvinfos
 
 
 def prepare_original_descp(folder, filenames):
@@ -139,6 +160,8 @@ def has_description_file(folder, filename):
     return os.path.isfile(abs_df)
 
 def is_other_file(filename):
+    if not filename:
+        return True
     if filename == 'cname':
         return True
     if filename == 'yhb':
@@ -154,9 +177,10 @@ def is_other_file(filename):
     return False
 
 
-def gather_description(folder, f):
-    #print f
-    video_filename = f.replace('.description', '')
+def gather_description(folder, video_filename):
+    """ gather description for video file 'f', when it has description-file.
+    """
+    #print video_filename
 
     lines = []
     # The 1st is the video file name
@@ -166,7 +190,8 @@ def gather_description(folder, f):
     text = gov_check(text)
     lines.append(text)
 
-    absfn = os.path.join(folder, f)
+    dfilename = video_filename + '.description'
+    absfn = os.path.join(folder, dfilename)
     with open(absfn, 'rb') as fh:
         des = fh.read()
         des = gov_check(des)
@@ -195,17 +220,21 @@ def is_description_file(fname):
 def gov_check(text):
     """ Check to avoid angry our gov
     """
-    text, n = re.subn(r'youtube', 'the biggest video website', text, flags=re.I)
-    text, n = re.subn(r'twitter', 'the micro blog creator', text, flags=re.I)
-    text, n = re.subn(r'facebook', 'one friendship website', text, flags=re.I)
-    text, n = re.subn(r'chinese\S+government', 'they', text, flags=re.I)
-    text, n = re.subn(r'beijing', 'one city', text, flags=re.I)
-    text, n = re.subn(r'communist', 'believer', text, flags=re.I)
-    text, n = re.subn(r'\bjzm\b', '', text, flags=re.I)
-    text, n = re.subn(r'\bxjp\b', '', text, flags=re.I)
-    text, n = re.subn(r'\bhjt\b', '', text, flags=re.I)
-    text, n = re.subn(r'\bdxp\b', '', text, flags=re.I)
-    text, n = re.subn(r'\bwjb\b', '', text, flags=re.I)
+    try:
+        text, n = re.subn(r'youtube', 'y2-----', text, flags=re.I)
+        text, n = re.subn(r'twitter', 'twi----', text, flags=re.I)
+        text, n = re.subn(r'facebook', 'fb', text, flags=re.I)
+        text, n = re.subn(r'chinese\S+government', 'they', text, flags=re.I)
+        text, n = re.subn(r'beijing', 'one city', text, flags=re.I)
+        text, n = re.subn(r'communist', 'believer', text, flags=re.I)
+        text, n = re.subn(r'\bjzm\b', ' ', text, flags=re.I)
+        text, n = re.subn(r'\bxjp\b', ' ', text, flags=re.I)
+        text, n = re.subn(r'\bhjt\b', ' ', text, flags=re.I)
+        text, n = re.subn(r'\bdxp\b', ' ', text, flags=re.I)
+        text, n = re.subn(r'\bwjb\b', ' ', text, flags=re.I)
+    except:
+        print "TROUBLE GOV CHECK: %s"%text
+        # return anyway, do not interupt process
     return text
 
 
@@ -222,6 +251,7 @@ def refit_filename(name):
     # remove single letter except 'a' 'A'
     refit, n = re.subn(r'\b[b-zB-Z]\b', '', refit)
 
+    refit = refit.replace('00001', '') # autonumbers from youtube-dl
     refit = refit.replace("_39_s", "'s")
     refit = refit.replace('_', ' ')
     refit = refit.replace('.', ' ')
@@ -242,20 +272,29 @@ def refit_filename(name):
     return refit
 
 
-def translate_vinfo(vinfo):
+def translate_vinfo(vinfo, nameonly=True):
+    """ Translate video information, which in a list 'vinfo'.
+
+    vinfo:  filename, title, description
+    return: translated list: filename, chinese title, lang, descriptions
+    """
     chinese = []
     lang = 'en'
     if not vinfo:
         return vinfo
-    for line in vinfo[1:]:
-        c, lang = translate_all_length_string(line)
+
+    # vinfo[0] is filename, vinfo[1] is refitted filename
+    # if nameonly set to True (default), only name get translated.
+
+    if nameonly:
+        c, lang = translate_all_length_string(vinfo[1])
         chinese.append(c)
-        
-        '''
-        if not c:
-            time.sleep(8)
-            '''
-        pass
+    else:
+        for line in vinfo[1:]:
+            c, lang = translate_all_length_string(line)
+            chinese.append(c)
+            pass
+
     # extend source language description at the end:
     chinese.extend(vinfo[1:])
     # language, after chinese title
@@ -263,13 +302,13 @@ def translate_vinfo(vinfo):
     # file name, first line:
     chinese.insert(0, vinfo[0])
     # replace in place:
-    vinfo = chinese
+    #vinfo = chinese
     return chinese
 
 def translate_line(line):
     line = line.strip()
     if not line:
-        return ''
+        return '', ''
 
     lang = 'en'
     print "Translating: %s ......\n"%line
@@ -285,11 +324,12 @@ def translate_line(line):
         pass
     print " get translated ------ : "
     print c
+    print "\n" 
     return c, lang
 
 def split_long_line(line):
     if len(line) < 2000:
-        return
+        return [line,]
 
     lines = []
     parts = line.split("\n\n")
@@ -326,6 +366,7 @@ def translate_all_length_string(gstring):
     return results, language
 
 
+'''
 def write_video_info_file(folder, filename, infos):
     absfn = os.path.join(folder, filename)
     with codecs.open(absfn, mode='wb', encoding='utf-8') as fh:
@@ -338,10 +379,11 @@ def write_video_info_file(folder, filename, infos):
                 fh.write(l)
                 fh.write("\n")
             fh.write("\n\n" + vi_delimit + "\n\n")
+'''
 
 
 
-if __name__ == "xx__main__":
+if __name__ == "__main__":
     print sys.argv[1]
     if not sys.argv[1]:
         print "\n Need a folder to 'gather and translate video infos'\n"
@@ -349,42 +391,3 @@ if __name__ == "xx__main__":
     folder = sys.argv[1]
     translate_flat_folder(folder)
 
-    ''' version before 0412
-    gather_n_translate_video_info(folder)
-    vf_name = os.path.join(folder, video_info_file_name)
-    print "\n video info file: %s \n"%vf_name
-    '''
-
-
-    """
-    ###
-    fs = get_filenames_in_folder()
-    print "\n".join(fs)
-
-    vv = gather_vinfo(folder, fs)
-    print "\n\n"
-    for v in vv:
-        print "\n"
-        for l in v:
-            print l
-
-    print gather_description('/home/za/myvid/testc',
-        "visual_c_and_serial_port_for_embedded_uart.flv.description")
-
-    #visual_studio_10_full_y_programe_en_c.mp4
-    #visual_studio_10_full_y_programe_en_c.mp4.description
-
-    #print simple_description(fs[1])
-
-    print sys.argv[1:]
-
-    if len(sys.argv) > 1:
-        folder = sys.argv[1]
-    else:
-        folder = '/home/za/myvid/testc'
-
-
-
-
-
-    """
