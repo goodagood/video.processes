@@ -215,7 +215,10 @@ class VideoFileProvidor(object):
         video_info_file = self._find_info_file(fullfilename)
         #print "video_info_file: %s \n"%video_info_file
         #print self.read_chinese_title(video_info_file, fullfilename)
-        return self.read_chinese_title(video_info_file, fullfilename)
+        if video_info_file:
+            return self.read_chinese_title(video_info_file, fullfilename)
+        else:
+            return None
 
         #todo
         pass
