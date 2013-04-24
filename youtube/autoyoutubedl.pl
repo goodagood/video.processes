@@ -17,6 +17,7 @@ while(<$vlist>){
     #print $_ if $_ !~ /^\s*$/;
     if( $_ !~ /^\s*$/ ){
         my $url = $_;
+        print  `pwd`;
         print "$ii to get: $url \n";
         #`perl ygv.pl $url`;
         #`myyoutube-dl.sh  $url`;
