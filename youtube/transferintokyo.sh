@@ -10,7 +10,7 @@ while [ 1 ]
 do
     #Transfer to another tokyo instance
     #rsync --remove-source-files --progress -P   -havz  /mnt/ee/   ubuntu@54.249.146.239:/mnt/myvid/
-    rsync  --progress -P   -havze "ssh -i /home/ubuntu/.ssh/ec2tokyo_kp.pem"  ubuntu@54.248.189.134:/media/my/cc/   /mnt/cc0405/
+    rsync  --remove-source-files  --progress -P   -havze "ssh -i /home/ubuntu/.ssh/ec2tokyo_kp.pem"  ubuntu@54.248.189.134:/media/my/raw/   /mnt/src/
 
     #rsync --remove-source-files --progress -P   -havze "ssh -i /home/ubuntu/.ssh/ec2tokyo_kp.pem"    /mnt/dd/   ubuntu@54.249.146.239:/mnt/myvid/
 

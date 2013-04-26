@@ -18,7 +18,7 @@ sub find_dirs{
 
     opendir(my $mydir, $base) or die $!;
     while(my $file = readdir($mydir)){
-        next unless(-d "$base/$file");
+        next unless(-d $base.$file);
         next if($file =~ /^\.+$/);
         #print $file . "\n";
 
@@ -29,6 +29,10 @@ sub find_dirs{
         }else{
             print "This is not todo dir: $abs_path \n";
         }
+
+        # close then re-open and read the dir $mydir:
+        close($mydir);
+        opendir(my $mydir, $base) or die $!;
 
     }
     close($mydir);
