@@ -477,6 +477,7 @@ basepath = os.path.normpath(<span class="str">'d:\\myvid'</span>)
             fileprovider = pickle.load(f)
             <span class="kw">if</span> fileprovider.basepath != basepath:
                 fileprovider.change_basepath(basepath)
+            fileprovider.add_files()
             fileprovider.check_file_list()
         <span class="kw">pass</span>
     <span class="kw">else</span>:
@@ -724,6 +725,10 @@ basepath = os.path.normpath(<span class="str">'d:\\myvid'</span>)
     <span class="kw">else</span>:
         <span class="kw">return</span> False
 
+<span class="kw">def</span> check_waiting_info():
+    <span class="kw">if</span> exists(Pattern(<img src="up_finished_waiting.png" />).exact()):
+        <span class="skw">click</span>(Pattern(<img src="up_finished_waiting.png" />).exact())
+
 
 <span class="kw">def</span> clean_56ican():
     <span class="kw">if</span> easy_clean_check_pass():
@@ -735,6 +740,7 @@ basepath = os.path.normpath(<span class="str">'d:\\myvid'</span>)
     check_auto_comeup_missing_info_dialog()
     check_save()
     check_fails()
+    check_waiting_info()
     <span class="kw">pass</span>
 
 
@@ -747,6 +753,10 @@ basepath = os.path.normpath(<span class="str">'d:\\myvid'</span>)
         logmsg = <span class="str">"exception in uploading file: %s\nwith description: %s \n"</span>%(fullfilename, description)
         logmsg = logmsg + <span class="str">"\n"</span> + ex.message
         writelog( logmsg)
+    <span class="kw">except</span>:
+        <span class="skw">type</span>, value, traceback = sys.exc_info()
+        logmsg = str(<span class="skw">type</span>) + <span class="str">"\n"</span> + str(value) + <span class="str">"\n"</span> + str(traceback) + <span class="str">"\n"</span>
+        writelog( logmsg)
 
     <span class="kw">while</span> too_many_uploading():
         time.<span class="skw">sleep</span>(<span class="dig">5</span>)
@@ -755,6 +765,10 @@ basepath = os.path.normpath(<span class="str">'d:\\myvid'</span>)
         <span class="kw">except</span> Exception, ex:
             logmsg = <span class="str">"exception in clean after file: %s\nwith description: %s \n"</span>%(fullfilename, description)
             logmsg = logmsg + <span class="str">"\n"</span> + ex.message
+            writelog( logmsg)
+        <span class="kw">except</span>:
+            <span class="skw">type</span>, value, traceback = sys.exc_info()
+            logmsg = str(<span class="skw">type</span>) + <span class="str">"\n"</span> + str(value) + <span class="str">"\n"</span> + str(traceback) + <span class="str">"\n"</span>
             writelog( logmsg)
 
 

@@ -232,6 +232,11 @@ class VideoFileProvidor(object):
         return 'ok'
 
 
+    def check_current_file(self):
+        if not os.path.isfile(self.current_file):
+            self.drop_current_file()
+
+
     def drop_current_file(self):
         # falsely report job done:
         self.report_job_done()
@@ -405,13 +410,15 @@ def get_file_provider(basepath = basepath, picklefile = picklefile):
             fileprovider = pickle.load(f)
             if fileprovider.basepath != basepath:
                 fileprovider.change_basepath(basepath)
-            fileprovider.check_file_list()
         pass
     else:
         #writelog("NO PICKLE FILE")
         fileprovider = VideoFileProvidor()
-        fileprovider.add_files()
         pass
+
+    fileprovider.add_files()
+    fileprovider.check_file_list()
+    fileprovider.check_current_file()
 
     return fileprovider
 
@@ -482,13 +489,6 @@ def check_fails():
     while exists("reloaded_56.png"): #56ican reload and lost
         click("reloaded_56.png")
 
-    '''
-    # put mouse away
-    if exists("down_right_corner.png"):
-        click("down_right_corner.png")
-    '''
-
-
 
 def too_many_uploading():
     if easy_clean_check_pass():
@@ -504,6 +504,7 @@ def too_many_uploading():
         return True
 
     return False
+
 
 def enter_filename(fullfilename):
     wait("filename_input.png", 18)
@@ -652,6 +653,10 @@ def easy_clean_check_pass():
     else:
         return False
 
+def check_waiting_info_2finished():
+    if exists(Pattern("up_finished_waiting.png").exact()):
+        click(Pattern("up_finished_waiting.png").exact())
+        
 
 def clean_56ican():
     if easy_clean_check_pass():
@@ -663,6 +668,7 @@ def clean_56ican():
     check_auto_comeup_missing_info_dialog()
     check_save()
     check_fails()
+    check_waiting_info_2finished()
     pass
 
 
@@ -730,38 +736,4 @@ upload_loop_01()
 ### tests:
 ### comment out after testing:
 
-'''
-fp = get_file_provider()
-fp.report_job_done()
-fp.pop_one_full_filename()
-
-writelog( "fp.current_file" )
-writelog( fp.current_file )
-fp.report_job_done()
-writelog( "fp.current_file" )
-writelog( fp.current_file )
-
-fp.report_job_done('d:\\myvid\\msbasics\\Windows_Live_Movie_Maker_Tutorial_-_Part_1.mp4')
-writelog( "fp.current_file" )
-writelog( fp.current_file )
-
-ffn = fp.pop_one_full_filename()
-writelog( "fp.current_file" )
-writelog( fp.current_file )
-
-vit, vil, vid = fp.get_video_info(ffn)
-writelog( "video info title" )
-writelog( vit )
-writelog( "video info lang" )
-writelog( vil )
-writelog( "video info description" )
-writelog( vid )
-
-writelog( "fp.__str__()")
-writelog( fp.__str__())
-
-fp.report_job_done('d:\\myvid\\msbasics\\1_9_Computer_hardware_basics.flv')
-writelog( "fp.__str__()")
-writelog( fp.__str__())
-'''
 
