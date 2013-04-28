@@ -9,7 +9,6 @@
 # Command line argument would be the name of the directory in the /media/my/, 
 # which will contains video files downloaded.
 
-my $base = '/mnt/gyoutube/';
 my $base = '/media/my/';
 # dirname is the folder name where we are going to put downloaded files:
 my $dirname = $base . $ARGV[0] . '/';
@@ -23,7 +22,7 @@ if(! -e $dirname ){
 	`mkdir $dirname`;
 }
 
-`cp /home/ubuntu/workspace/video.processes/youtube/linf.pl /home/ubuntu/workspace/video.processes/youtube/ygv.pl $dirname`;
+`cp /home/ubuntu/workspace/video.processes/youtube/ygv.pl $dirname`;
 `cp /home/ubuntu/workspace/video.processes/youtube/autoyoutubedl.pl     $dirname`;
 
 
@@ -36,7 +35,5 @@ if ( -e '/tmp/fha' ){
 
 `mv /tmp/yhb  $dirname`;
 
-# do this by hand
-#`cd $dirname && time perl linf.pl`;
  
 exit 0;
