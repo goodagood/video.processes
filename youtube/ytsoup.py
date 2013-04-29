@@ -26,6 +26,38 @@ def fetch_vlinks(kws, numbers=200, start=1):
     return vld
 
 
+def prepare_ytdl(dirname):
+    adir = "/mnt/gyoutube/%s/"%dirname
+
+    cmd = "mkdir /mnt/gyoutube/%s"%dirname
+    print "%s \n"%cmd
+    os.system(cmd)
+
+    cmd = "mv /tmp/ylsoup  /mnt/gyoutube/%s/yhb"%dirname
+    print "%s \n"%cmd
+    os.system(cmd)
+
+    cmd = """cp  /home/ubuntu/workspace/video.processes/youtube/autoyoutubedl.pl %s"""%adir
+    print "%s \n"%cmd
+    os.system(cmd)
+
+
+def prepare_ytdl_pversion(dirname):
+    adir = "/media/my/%s/"%dirname
+
+    cmd = "mkdir /media/my/%s"%dirname
+    print "%s \n"%cmd
+    os.system(cmd)
+
+    cmd = "mv /tmp/ylsoup  /media/my/%s/yhb"%dirname
+    print "%s \n"%cmd
+    os.system(cmd)
+
+    cmd = """cp  /home/ubuntu/workspace/video.processes/youtube/autoyoutubedl.pl %s"""%adir
+    print "%s \n"%cmd
+    os.system(cmd)
+
+
 def refit_plist(vlist):
     vnew = []
     for v in vlist:
@@ -52,22 +84,6 @@ def write_vlist(vlist, filename = '/tmp/ylsoup'):
     with open(filename, 'wb') as fh:
         fh.write("\n".join(vlist))
 
-
-def prepare_ytdl(dirname):
-    adir = "/mnt/gyoutube/%s/"%dirname
-
-    cmd = "mkdir /mnt/gyoutube/%s"%dirname
-    print "%s \n"%cmd
-    os.system(cmd)
-
-    cmd = "mv /tmp/ylsoup  /mnt/gyoutube/%s/yhb"%dirname
-    print "%s \n"%cmd
-    os.system(cmd)
-
-    cmd = """cp  /home/ubuntu/workspace/video.processes/youtube/autoyoutubedl.pl %s"""%adir
-    print "%s \n"%cmd
-    os.system(cmd)
-    
 
 def read_yt_page(kws, page = 0):
     keywords = "+".join(kws)

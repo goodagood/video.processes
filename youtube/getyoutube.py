@@ -22,6 +22,7 @@ def getyoutube(kwords="african crowned crane", number=100, seconds=600):
     results = []
     for i in range(cycles):
         query.start_index = 1 + i * 50
+        print "start_index %s \n"%query.start_index
 
         feed = client.YouTubeQuery(query)
 
@@ -32,8 +33,13 @@ def getyoutube(kwords="african crowned crane", number=100, seconds=600):
             if dur < seconds:
                 one = dict(title=title, href=href)
                 results.append(one)
-        time.sleep(10)
+                print "entry: %s \n"%title
+            else:
+                print "over long: %s \n"%title
+        write_fha(results)
+        time.sleep(108)
 
+    """
     fh = open('/tmp/fha', 'w+b')
     for one in results:
         fh.write(one['title'])
@@ -41,8 +47,20 @@ def getyoutube(kwords="african crowned crane", number=100, seconds=600):
         fh.write(one['href'])
         fh.write("\n")
         fh.write("\n")
-        
+    """
+
     return results
+
+
+def write_fha(ddict):
+    with open('/tmp/fha', 'wb') as fh:
+        for one in ddict:
+            fh.write(one['title'])
+            fh.write("\n")
+            fh.write(one['href'])
+            fh.write("\n")
+            fh.write("\n")
+
 
 
 ## results write to /tmp/ylessa
