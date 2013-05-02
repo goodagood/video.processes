@@ -6,10 +6,10 @@ use strict;
 
 my $basedir = '/media/my/';
 
-find_dirs($basedir);
+do_dirs($basedir);
 
 
-sub find_dirs{
+sub do_dirs{
     my $base = shift;
 
     if(!$base){

@@ -6,18 +6,34 @@ use strict;
 
 my $basedir = '/mnt/gyoutube/';
 
-find_dirs($basedir);
+
+do_dirs($basedir);
 
 
-sub find_dirs{
+sub do_dirs{
     my $base = shift;
 
     if(!$base){
         return;
     }
 
+    my $abs_path = find_waiting_dir($base);
+    while( $abs_path ){
+        print $abs_path . "  -- going to do youtubedl.\n"; 
+        system("cd $abs_path && perl autoyoutubedl.pl");
+        $abs_path = find_waiting_dir($base);
+
+    }
+
+}
+
+
+sub find_waiting_dir{
+    my $base = shift;
+
     opendir(my $mydir, $base) or die $!;
-    while(my $file = readdir($mydir)){
+    my $file = readdir($mydir)
+    while( $file ){
         next unless(-d $base.$file);
         next if($file =~ /^\.+$/);
         #print $file . "\n";
@@ -25,19 +41,17 @@ sub find_dirs{
         my $abs_path = $base . $file;
         if( is_waiting_dir($abs_path) == 1){
             print $abs_path . "  -- going to do youtubedl.\n"; 
-            system("cd $abs_path && perl autoyoutubedl.pl");
+            return $abs_path;
         }else{
             print "This is not todo dir: $abs_path \n";
         }
 
-        # close then re-open and read the dir $mydir:
-        close($mydir);
-        opendir(my $mydir, $base) or die $!;
 
     }
     close($mydir);
-
+    return 0;
 }
+
 
 sub is_waiting_dir{
     my $dir = shift;
