@@ -1,0 +1,44 @@
+
+autoyoutubedl.pl
+    # automatically download youtube videos by 'youtube-dl.py'
+    # the folder is prepared before hand
+
+find-v-dir.pl
+    # find those might finished folder, that video file downloaded.
+
+getyoutube.py
+gtrans.py      tools used for google translate api
+keepdl.pl      keep download from youtube
+keepdl-proxy.pl       same to work on the proxy ec2 server
+linf.pl
+make-cvinfo.py        for folder contain Chinese video and no need to translate
+make-vinfo.py         make the cname file after the folder been encoded
+
+make_mnt_dir.pl
+prepare-ydl-vpn.pl
+regular-cfilename.pl  
+    # rename the utf-8 file names, and do same for 'cname' file.
+    # for video file name of chinese, it can't be s3cmd to window server
+
+startyoutube.pl
+    # used when I used youtube.com api to search video links, 
+    # this will prepare a folder after video links ready in /tmp/fha
+
+transferintokyo.sh
+    # transfer file between ec2 tokyo instances
+
+transfer.sh
+
+ygv.pl
+youtubelist.pl
+
+ytsoup.py
+    # to gather/scraper youtube video links, this is write in python using beautifulsoup.
+    # This not depend on youtube.com api
+    # In the package, this file, also provide function to gather large amount and 
+    #   auto split into small folders.
+ytsoup1.py
+    # updated from 'ytsoup.py', re-designed
+    # Data sealed in class YtLinkList, all links collected from each page will 
+    #   check and de-duplicated. 
+    # Auto way to split all links into many downloading dirs.

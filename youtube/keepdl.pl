@@ -32,8 +32,7 @@ sub find_waiting_dir{
     my $base = shift;
 
     opendir(my $mydir, $base) or die $!;
-    my $file = readdir($mydir)
-    while( $file ){
+    while(my $file = readdir($mydir) ){
         next unless(-d $base.$file);
         next if($file =~ /^\.+$/);
         #print $file . "\n";
@@ -41,6 +40,7 @@ sub find_waiting_dir{
         my $abs_path = $base . $file;
         if( is_waiting_dir($abs_path) == 1){
             print $abs_path . "  -- going to do youtubedl.\n"; 
+            close($mydir);
             return $abs_path;
         }else{
             print "This is not todo dir: $abs_path \n";

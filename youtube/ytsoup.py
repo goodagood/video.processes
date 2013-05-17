@@ -4,7 +4,27 @@ import time
 import re
 import os
 
+def gather_multi_vl(kws, numbers=1200, onepiece=200, start=1, name='vloe' ):
+    number_of_folders = numbers/onepiece
+    for i in range( number_of_folders ):
+        folder_name = "%s%i"%(name, i)
+        nstart = start + i * (onepiece/20)
+        gather_vlinks_on_encoder(kws, onepiece, start=nstart, name=folder_name)
+
+    
+
+def gather_vlinks_on_encoder(kws, numbers=200, start=1, name='vloe' ):
+    """Gather the links from youtube and prepare downloading folder.
+
+    So 'keepdl' can do it automatically.
+    """
+    fetch_vlinks(kws=kws, numbers=numbers, start=start)
+    prepare_ytdl(dirname=name)
+    pass
+
+
 def fetch_vlinks(kws, numbers=200, start=1):
+    # start is page number
     number_of_pags = int(numbers/20 + 1)
     vlinks = []
     for i in range(start,  start + number_of_pags):
@@ -14,17 +34,33 @@ def fetch_vlinks(kws, numbers=200, start=1):
         vlinks.extend(lsa)
 
         print "page %i, links %i \n"%(i, len(vlinks))
-        time.sleep(8)
+        time.sleep(38)
 
-    vla = set(vlinks)
-    vlb = list(vla)
-
-    vlc = refit_plist(vlb)
+    vlc = refit_plist(vlinks)
+    vlc = de_duplicate(vlc)
     vld = add2full_href(vlc)
 
     write_vlist(vld)
     return vld
 
+## ??
+def get_pages(kws, pages=100, filename='onepiece'):
+    video_links = []
+    # 10 pages each.
+    # rounds 
+    rounds = int(pages/10) + 1
+    for i in range(1, rounds+1):
+        pass
+        #todo
+        links = fetch_vlinks(kws, numbers=200, start=i)
+        video_links.extend(links)
+
+    pass
+
+def de_duplicate(inlist):
+    vla = set(inlist)
+    vlb = list(vla)
+    return vlb
 
 def prepare_ytdl(dirname):
     adir = "/mnt/gyoutube/%s/"%dirname
@@ -58,11 +94,21 @@ def prepare_ytdl_pversion(dirname):
     os.system(cmd)
 
 
+def gather_vlinks_on_ec2proxy(kws, numbers=200, start=1, name='vloe' ):
+    """Gather the links from youtube and prepare downloading folder.
+
+    So 'keepdl' can do it automatically.
+    """
+    fetch_vlinks(kws=kws, numbers=numbers, start=start)
+    prepare_ytdl_pversion(dirname=name)
+    pass
+
 def refit_plist(vlist):
     vnew = []
     for v in vlist:
         # cut off the playlist part in href:
         v = re.sub(r'&playnext=.+$', '', v)
+        v = re.sub(r'&list=.+$', '', v)
         vnew.append(v)
         pass
     return vnew
