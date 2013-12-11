@@ -714,7 +714,8 @@ def upload_loop_01():
 
         #popup( fullfilename + "  " + cname)
         try_56ican(filename, fullfilename, title, description)
-        writelog(fp.__str__()) ##testing
+        number_todo = len(fp.todo)
+        writelog( "number of file to upload: %s"%(str(number_todo)))
         fp.report_job_done()
 
         if stop_signal_comes():
@@ -723,6 +724,8 @@ def upload_loop_01():
 
         fullfilename = fp.pop_one_full_filename()
         title,lang,description = fp.get_video_info(fullfilename)
+        # I want to check the number of todo:
+        description = "(%s) "%(str(number_todo))  + description
         filename = os.path.basename(fullfilename)
 
 
